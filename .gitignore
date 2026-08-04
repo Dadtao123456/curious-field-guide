@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# WeChat Mini Program
+miniprogram_npm/
+node_modules/
+project.private.config.json
+
+# Build outputs
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+.cache/
+
+# PDF extracted text (auto-generated from PRD)
+# Keep the source PDF, ignore auto-extracted text if desired
+# 好奇图鉴_PRD_v1.4.txt

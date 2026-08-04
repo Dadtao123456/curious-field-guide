@@ -1,0 +1,55 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/result/result",
+    "pages/collection/collection",
+    "pages/profile/profile",
+    "pages/manual-search/manual-search",
+    "pages/share-card/share-card",
+    "pages/privacy/privacy"
+  ],
+  "tabBar": {
+    "color": "#9CA3AF",
+    "selectedColor": "#3D8B5E",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "发现",
+        "iconPath": "images/tabbar/discovery.png",
+        "selectedIconPath": "images/tabbar/discovery-active.png"
+      },
+      {
+        "pagePath": "pages/collection/collection",
+        "text": "图鉴",
+        "iconPath": "images/tabbar/collection.png",
+        "selectedIconPath": "images/tabbar/collection-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tabbar/profile.png",
+        "selectedIconPath": "images/tabbar/profile-active.png"
+      }
+    ]
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#FAFBF7",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "好奇图鉴",
+    "backgroundColor": "#FAFBF7",
+    "backgroundTextStyle": "dark"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "记录发现地点（仅存储公园/小区级别地名，不存储精确坐标）"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

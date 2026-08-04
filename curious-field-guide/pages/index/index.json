@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "好奇图鉴",
+  "usingComponents": {
+    "privacy-modal": "/components/privacy-modal/privacy-modal",
+    "rarity-tags": "/components/rarity-tags/rarity-tags"
+  }
+}

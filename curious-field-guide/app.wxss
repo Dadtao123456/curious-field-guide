@@ -1,0 +1,204 @@
+/* 好奇图鉴 - 全局样式表 */
+
+/* 1. CSS 变量：颜色系统 */
+page {
+  --color-primary: #3D8B5E;
+  --color-primary-dark: #2C6E4B;
+  --color-primary-light: #E8F5E9;
+
+  --color-bg-page: #FAFBF7;
+  --color-bg-card: #FFFFFF;
+  --color-border: #EDF0E9;
+
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
+  --color-text-tertiary: #9CA3AF;
+
+  --color-first-discovery: #10B981;
+  --color-first-discovery-dark: #047857;
+  --color-first-discovery-light: rgba(16, 185, 129, 0.12);
+
+  --color-streak: #F59E0B;
+  --color-streak-dark: #B45309;
+  --color-streak-light: rgba(245, 158, 11, 0.12);
+
+  --color-night: #8B5CF6;
+  --color-night-dark: #6D28D9;
+  --color-night-light: rgba(139, 92, 246, 0.12);
+
+  --color-warning: #E9C46A;
+  --color-warning-dark: #92400E;
+  --color-warning-light: #FEF3C7;
+
+  --color-error: #EF4444;
+  --color-error-dark: #991B1B;
+
+  --spacing-xs: 8rpx;
+  --spacing-sm: 16rpx;
+  --spacing-md: 24rpx;
+  --spacing-lg: 32rpx;
+  --spacing-xl: 48rpx;
+
+  --radius-sm: 16rpx;
+  --radius-md: 24rpx;
+  --radius-pill: 9999rpx;
+
+  --shadow-card: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  --shadow-button: 0 8rpx 24rpx rgba(61, 139, 94, 0.25);
+
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  box-sizing: border-box;
+}
+
+/* 2. 页面容器 */
+.page-container {
+  min-height: 100vh;
+  padding: var(--spacing-xl) var(--spacing-lg);
+  box-sizing: border-box;
+}
+
+/* 3. 通用卡片 */
+.card {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-card);
+}
+
+/* 4. 按钮 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  transition: opacity 0.1s ease;
+}
+
+.btn:active {
+  opacity: 0.9;
+}
+
+.btn-primary {
+  height: 96rpx;
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  font-size: 32rpx;
+  box-shadow: var(--shadow-button);
+}
+
+.btn-primary:active {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  height: 80rpx;
+  background-color: var(--color-bg-card);
+  color: var(--color-primary);
+  font-size: 28rpx;
+  border: 2rpx solid var(--color-primary);
+}
+
+.btn-secondary:active {
+  background-color: var(--color-primary-light);
+}
+
+.btn-disabled {
+  background-color: #A7F3D0;
+  color: #FFFFFF;
+  box-shadow: none;
+}
+
+/* 5. 文字层级 */
+.text-page-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  line-height: 64rpx;
+  color: var(--color-text-primary);
+}
+
+.text-page-subtitle {
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: var(--color-text-secondary);
+}
+
+.text-section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  line-height: 48rpx;
+  color: var(--color-text-primary);
+}
+
+.text-card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 44rpx;
+  color: var(--color-text-primary);
+}
+
+.text-body {
+  font-size: 28rpx;
+  line-height: 44rpx;
+  color: var(--color-text-primary);
+}
+
+.text-caption {
+  font-size: 24rpx;
+  line-height: 36rpx;
+  color: var(--color-text-secondary);
+}
+
+.text-small {
+  font-size: 22rpx;
+  line-height: 32rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 6. 标签 / 胶囊 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+.tag-first-discovery {
+  background-color: var(--color-first-discovery-light);
+  color: var(--color-first-discovery-dark);
+}
+
+.tag-streak {
+  background-color: var(--color-streak-light);
+  color: var(--color-streak-dark);
+}
+
+.tag-night {
+  background-color: var(--color-night-light);
+  color: var(--color-night-dark);
+}
+
+/* 7. 通用间距工具类 */
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

@@ -1,0 +1,32 @@
+/* 稀有度标签组件样式 */
+
+.rarity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.rarity-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  line-height: 40rpx;
+}
+
+.tag-green {
+  background-color: var(--color-first-discovery-light);
+  color: var(--color-first-discovery-dark);
+}
+
+.tag-orange {
+  background-color: var(--color-streak-light);
+  color: var(--color-streak-dark);
+}
+
+.tag-purple {
+  background-color: var(--color-night-light);
+  color: var(--color-night-dark);
+}

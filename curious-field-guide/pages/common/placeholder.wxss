@@ -1,0 +1,14 @@
+/* 占位页面通用样式 */
+
+.placeholder-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.placeholder-icon {
+  font-size: 120rpx;
+  margin-bottom: var(--spacing-md);
+}

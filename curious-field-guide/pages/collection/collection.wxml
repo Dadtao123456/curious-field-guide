@@ -1,0 +1,6 @@
+<view class="page-container placeholder-page">
+  <text class="placeholder-icon">📚</text>
+  <text class="text-section-title">我的图鉴</text>
+  <text class="text-caption mt-sm">这里将展示你收集的所有物种</text>
+  <text class="text-caption">（v1.0 第 3 轮实现）</text>
+</view>

@@ -1,0 +1,7 @@
+<view class="page-container">
+  <view class="card mt-lg">
+    <text class="text-section-title">隐私政策</text>
+    <text class="text-body mt-md">好奇图鉴重视你的隐私。本页面将展示完整隐私政策内容。</text>
+    <text class="text-caption mt-md">（v1.0 第 1 轮占位，后续补充完整文本）</text>
+  </view>
+</view>

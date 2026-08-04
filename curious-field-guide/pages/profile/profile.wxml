@@ -1,0 +1,6 @@
+<view class="page-container placeholder-page">
+  <text class="placeholder-icon">👤</text>
+  <text class="text-section-title">个人中心</text>
+  <text class="text-caption mt-sm">这里将展示你的成就和设置</text>
+  <text class="text-caption">（v1.0 第 4 轮实现）</text>
+</view>

@@ -1,0 +1,24 @@
+<!-- 隐私政策弹窗组件 -->
+<!-- 说明：首次启动或仅浏览模式下点击敏感功能时弹出 -->
+
+<view class="privacy-mask" wx:if="{{visible}}" bindtap="onMaskTap">
+  <view class="privacy-container" catchtap="onContainerTap">
+    <view class="privacy-title">欢迎使用好奇图鉴</view>
+
+    <view class="privacy-desc">
+      <text class="privacy-desc-title">我们重视你的隐私：</text>
+      <view class="privacy-item">• 拍照识别需要相机权限</view>
+      <view class="privacy-item">• 记录发现地点需要定位权限，坐标将发送至腾讯位置服务解析为地名（不存储精确坐标）</view>
+      <view class="privacy-item">• 你拍摄的照片会上传至百度智能云、Pl@ntNet 进行物种识别</view>
+      <view class="privacy-item">• 手动搜索时，你输入的关键词会发送至 iNaturalist / 中国生物物种名录 / GBIF</view>
+      <view class="privacy-item">• 以上传输均不包含你的身份信息</view>
+    </view>
+
+    <view class="privacy-link" bindtap="onViewFullPolicy">查看完整隐私政策</view>
+
+    <view class="privacy-actions">
+      <button class="privacy-btn privacy-btn-primary" bindtap="onAgree">同意并继续</button>
+      <button class="privacy-btn privacy-btn-secondary" bindtap="onBrowseOnly">仅浏览</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+<view class="page-container placeholder-page">
+  <text class="placeholder-icon">🎴</text>
+  <text class="text-section-title">分享卡片</text>
+  <text class="text-caption mt-sm">这里将生成精美的物种发现卡片</text>
+  <text class="text-caption">（v1.0 第 5 轮实现）</text>
+</view>

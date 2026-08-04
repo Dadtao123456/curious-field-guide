@@ -1,0 +1,6 @@
+<view class="page-container placeholder-page">
+  <text class="placeholder-icon">🔍</text>
+  <text class="text-section-title">识别结果</text>
+  <text class="text-caption mt-sm">这里将展示生活照与官方图对比</text>
+  <text class="text-caption">（v1.0 第 2 轮实现）</text>
+</view>

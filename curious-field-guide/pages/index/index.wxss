@@ -1,0 +1,155 @@
+/* 首页样式 */
+
+.index-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.index-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.streak-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 48rpx;
+  padding: 0 24rpx;
+  border-radius: 24rpx;
+  background-color: var(--color-streak-light);
+  margin-bottom: var(--spacing-lg);
+}
+
+.streak-text {
+  font-size: 24rpx;
+  color: var(--color-streak-dark);
+  font-weight: 600;
+}
+
+.camera-entry-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 400rpx;
+}
+
+.camera-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 280rpx;
+  height: 280rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  box-shadow: 0 16rpx 40rpx rgba(61, 139, 94, 0.3);
+}
+
+.camera-entry:active {
+  transform: scale(0.98);
+}
+
+.camera-entry-disabled {
+  opacity: 0.6;
+}
+
+.camera-icon {
+  font-size: 64rpx;
+  margin-bottom: var(--spacing-sm);
+}
+
+.camera-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #FFFFFF;
+}
+
+.camera-desc {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: var(--spacing-xs);
+}
+
+.recent-section {
+  width: 100%;
+  margin-top: var(--spacing-xl);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.section-more {
+  font-size: 26rpx;
+  color: var(--color-text-tertiary);
+}
+
+.recent-list {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.recent-item:last-child {
+  border-bottom: none;
+}
+
+.recent-item:active {
+  background-color: var(--color-bg-page);
+}
+
+.recent-emoji {
+  font-size: 48rpx;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-md);
+}
+
+.recent-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.recent-meta {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--spacing-xl);
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: var(--spacing-sm);
+}

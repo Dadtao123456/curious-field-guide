@@ -205,7 +205,7 @@
   font-size: 20rpx;
   font-weight: 700;
   font-family: var(--font-hand);
-  line-height: 1.2;
+  line-height: 1.6;
 }
 
 .mini-tag-green {

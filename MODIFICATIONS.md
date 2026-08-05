@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-08-05 09:02
+
+- **描述**：标签文字仍偏上，继续把 `.tag`、`.mini-tag`、`.rarity-tag` 的 `line-height` 从 `1.2` 调整为 `1.6`，使文字在胶囊内视觉居中。
+- **模块**：
+  - `curious-field-guide/app.wxss`
+  - `curious-field-guide/pages/index/index.wxss`
+  - `curious-field-guide/components/rarity-tags/rarity-tags.wxss`
+- **备注**：语法检查通过。
+
+---
+
 ## 2026-08-05 08:55
 
 - **描述**：根据产品侧反馈，去掉首页「连续 N 天」streak pill；修复最近发现卡片中蜡笔标签文字垂直偏上的问题，将全局 `.tag`、`.mini-tag`、`.rarity-tag` 的 `line-height` 从 `1` 调整为 `1.2`，使文字在胶囊内视觉居中。

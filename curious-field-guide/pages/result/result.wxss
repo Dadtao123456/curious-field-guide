@@ -1,1 +1,109 @@
-@import '/pages/common/placeholder.wxss';
+/* 识别结果页样式（手账风格） */
+
+.result-page {
+  padding-bottom: var(--space-xxl);
+}
+
+/* 照片对比区 */
+.photo-compare {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.photo-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.photo-img,
+.photo-placeholder {
+  width: 100%;
+  height: 220rpx;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 8rpx 28rpx 12rpx 22rpx;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.photo-placeholder-life {
+  background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+  transform: rotate(-1deg);
+}
+
+.photo-placeholder-id {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  transform: rotate(1deg);
+}
+
+.photo-emoji {
+  font-size: 72rpx;
+}
+
+.photo-label {
+  font-size: var(--text-small);
+  color: var(--gray);
+  font-family: var(--font-hand);
+  text-align: center;
+}
+
+/* 物种名称区 */
+.species-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.species-name {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  transform: rotate(-0.5deg);
+  transform-origin: left center;
+}
+
+.species-latin {
+  font-size: var(--text-body);
+  color: var(--gray);
+  font-style: italic;
+  font-family: var(--font-hand);
+}
+
+/* 信息卡片 */
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.info-title {
+  font-size: var(--text-h4);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+.info-text {
+  font-size: var(--text-body);
+  line-height: 44rpx;
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 底部操作区 */
+.result-actions {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  font-size: 30rpx;
+}

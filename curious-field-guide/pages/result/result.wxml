@@ -1,6 +1,62 @@
-<view class="page-container placeholder-page">
-  <text class="placeholder-icon">🔍</text>
-  <text class="text-section-title">识别结果</text>
-  <text class="text-caption mt-sm">这里将展示生活照与官方图对比</text>
-  <text class="text-caption">（v1.0 第 2 轮实现）</text>
+<!-- 好奇图鉴 - 识别结果页（手账风格） -->
+<!-- 数据流：onLoad 读取识别结果/发现记录 → 渲染照片对比、物种信息、标签 → 收藏/生成卡片 -->
+
+<view class="page-container result-page">
+  <!-- 照片对比区 -->
+  <view class="photo-compare">
+    <view class="photo-box">
+      <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img" />
+      <view wx:else class="photo-placeholder photo-placeholder-life">
+        <text class="photo-emoji">📷</text>
+      </view>
+      <text class="photo-label">生活照</text>
+    </view>
+    <view class="photo-box">
+      <view class="photo-placeholder photo-placeholder-id">
+        <text class="photo-emoji">{{categoryEmoji}}</text>
+      </view>
+      <text class="photo-label">身份证照</text>
+    </view>
+  </view>
+
+  <!-- 物种名称区 -->
+  <view class="species-block mt-lg">
+    <text class="species-name">{{species.name}}</text>
+    <text class="species-latin">{{species.latinName}}</text>
+    <rarity-tags tags="{{tags}}" class="species-tags" />
+  </view>
+
+  <!-- 信息区块 -->
+  <view class="info-card card mt-lg">
+    <text class="info-title">形态特征</text>
+    <text class="info-text">{{species.description}}</text>
+  </view>
+
+  <view class="info-card card mt-md">
+    <text class="info-title">分布与习性</text>
+    <text class="info-text">{{species.habitat}}</text>
+  </view>
+
+  <view class="info-card card mt-md">
+    <text class="info-title">发现信息</text>
+    <text class="info-text">{{discovery.location}} · {{discovery.discoveredAtText}}</text>
+    <text class="info-text" wx:if="{{species.order}}">{{species.order}} · {{species.family}}</text>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="result-actions mt-xl">
+    <view class="btn btn-secondary action-btn" bindtap="onShareCard">生成卡片</view>
+    <view class="btn btn-primary action-btn {{isCollected ? 'btn-disabled' : ''}}" bindtap="onCollect">
+      {{isCollected ? '已收入图鉴' : '收入图鉴'}}
+    </view>
+  </view>
 </view>
+
+<!-- 隐私政策弹窗（仅浏览模式收藏时触发） -->
+<privacy-modal
+  visible="{{showPrivacyModal}}"
+  bind:agree="onPrivacyAgree"
+  bind:browseOnly="onPrivacyBrowseOnly"
+  bind:viewPolicy="onViewPrivacyPolicy"
+  bind:close="onPrivacyClose"
+/>

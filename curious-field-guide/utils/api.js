@@ -80,8 +80,73 @@ function searchSpecies(keyword) {
   })));
 }
 
+/**
+ * 按 id 获取单条发现记录（只读模式）
+ * 说明：合并物种百科字段，供结果页/详情页展示
+ * @param {String} id - 发现记录 id
+ * @returns {Promise<Object>} 发现记录 + 物种信息
+ */
+function getDiscoveryById(id) {
+  const discovery = MOCK_DISCOVERIES.find(item => item.id === id);
+  if (!discovery) {
+    return Promise.reject(new Error('发现记录不存在'));
+  }
+
+  const species = MOCK_SPECIES_LIST.find(item => item.speciesKey === discovery.speciesKey) || {};
+
+  return Promise.resolve({
+    ...discovery,
+    description: species.description || '',
+    habitat: species.habitat || '',
+    order: species.order || '',
+    family: species.family || '',
+    officialPhotoUrl: species.officialPhotoUrl || ''
+  });
+}
+
+/**
+ * 获取已收藏列表（mock）
+ * 说明：v1.0 存本地缓存，接入云开发后改为查询数据库
+ * @returns {Promise<Array>} 收藏记录数组
+ */
+function getCollections() {
+  try {
+    return Promise.resolve(wx.getStorageSync('mock_collections') || []);
+  } catch (error) {
+    console.error('[api] 读取收藏列表失败', error);
+    return Promise.resolve([]);
+  }
+}
+
+/**
+ * 收入图鉴（mock）
+ * 说明：把识别结果追加到本地收藏列表，重复收藏同一物种会被忽略
+ * @param {Object} record - 收藏记录（含 speciesKey）
+ * @returns {Promise<Object>} { success, duplicated }
+ */
+function addCollection(record) {
+  try {
+    const list = wx.getStorageSync('mock_collections') || [];
+    const duplicated = list.some(item => item.speciesKey === record.speciesKey);
+    if (!duplicated) {
+      list.unshift({
+        ...record,
+        collectedAt: new Date().toISOString()
+      });
+      wx.setStorageSync('mock_collections', list);
+    }
+    return Promise.resolve({ success: true, duplicated });
+  } catch (error) {
+    console.error('[api] 收藏失败', error);
+    return Promise.resolve({ success: false, duplicated: false });
+  }
+}
+
 module.exports = {
   getDashboard,
   identifyImage,
-  searchSpecies
+  searchSpecies,
+  getDiscoveryById,
+  getCollections,
+  addCollection
 };

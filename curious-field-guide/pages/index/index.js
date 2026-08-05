@@ -4,52 +4,7 @@
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
 const { CATEGORIES, CATEGORY_LIST } = require('../../utils/constants');
-
-/**
- * 将稀有度标签字符串数组解析为 { label, color }
- * 说明：按 PRD 与设计规范映射颜色
- * @param {Array<String>} tags
- * @returns {Array<Object>}
- */
-function parseRarityTags(tags) {
-  if (!Array.isArray(tags) || tags.length === 0) return [];
-
-  return tags.map(tag => {
-    const label = String(tag);
-    if (label.includes('首次')) {
-      return { label, color: 'green' };
-    }
-    if (label.includes('连续') || label.includes('streak')) {
-      return { label, color: 'orange' };
-    }
-    if (label.includes('夜间')) {
-      return { label, color: 'purple' };
-    }
-    return { label, color: 'blue' };
-  });
-}
-
-/**
- * 格式化发现时间
- * 说明：将 ISO 时间转换为「今天 / 昨天 / 前天 / MM.DD」等可读文本
- * @param {String} isoString - ISO 时间字符串
- * @returns {String}
- */
-function formatDiscoveryTime(isoString) {
-  const date = new Date(isoString);
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-  const dateStr = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-
-  const diffDays = Math.floor((new Date(todayStr) - new Date(dateStr)) / (1000 * 60 * 60 * 24));
-
-  const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-
-  if (diffDays === 0) return `今天 ${timeStr}`;
-  if (diffDays === 1) return `昨天 ${timeStr}`;
-  if (diffDays === 2) return `前天 ${timeStr}`;
-  return `${date.getMonth() + 1}月${date.getDate()}日 ${timeStr}`;
-}
+const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
 
 Page({
   /**
@@ -175,12 +130,7 @@ Page({
       sizeType: ['compressed'],
       sourceType: ['camera'],
       success: (res) => {
-        console.log('[index] 拍照成功', res.tempFilePaths[0]);
-        // v1.0 第 1 轮：仅打印路径，真实识别在第 2 轮实现
-        wx.showToast({
-          title: '照片已获取（mock 识别待实现）',
-          icon: 'none'
-        });
+        this.identifyAndNavigate(res.tempFilePaths[0]);
       },
       fail: (error) => {
         console.error('[index] 拍照失败', error);
@@ -197,15 +147,33 @@ Page({
       sizeType: ['compressed'],
       sourceType: ['album'],
       success: (res) => {
-        console.log('[index] 相册选择成功', res.tempFilePaths[0]);
-        wx.showToast({
-          title: '照片已获取（mock 识别待实现）',
-          icon: 'none'
-        });
+        this.identifyAndNavigate(res.tempFilePaths[0]);
       },
       fail: (error) => {
         console.error('[index] 相册选择失败', error);
       }
+    });
+  },
+
+  /**
+   * 调用 mock 识别并跳转结果页
+   * 说明：识别结果通过本地缓存传递给结果页（数据量大，不适合 URL 参数）
+   * @param {String} imagePath - 照片临时路径
+   */
+  identifyAndNavigate(imagePath) {
+    wx.showLoading({ title: '识别中...', mask: true });
+
+    api.identifyImage(imagePath).then(result => {
+      wx.hideLoading();
+      result.userPhotoUrl = imagePath;
+      wx.setStorageSync('identify_result', result);
+      wx.navigateTo({
+        url: '/pages/result/result?mode=identify'
+      });
+    }).catch(error => {
+      wx.hideLoading();
+      console.error('[index] 识别失败', error);
+      wx.showToast({ title: '识别失败，请重试', icon: 'none' });
     });
   },
 
@@ -256,14 +224,12 @@ Page({
 
   /**
    * 点击最近发现项
-   * 说明：跳转结果页只读模式（结果页在第 2 轮实现，先占位提示）
+   * 说明：跳转结果页只读模式，展示该次发现的详细信息
    */
   onRecentItemTap(event) {
     const id = event.currentTarget.dataset.id;
-    console.log('[index] 点击最近发现', id);
-    wx.showToast({
-      title: '结果页待实现',
-      icon: 'none'
+    wx.navigateTo({
+      url: `/pages/result/result?mode=readonly&id=${id}`
     });
   },
 

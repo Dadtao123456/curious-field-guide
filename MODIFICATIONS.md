@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-08-05 09:35
+
+- **描述**：完成第 3 轮增量交付：实现手账风格识别结果页并打通「首页拍照 → mock 识别 → 结果页」流程。结果页包含生活照/身份证照对比区、物种名与拉丁名、蜡笔稀有度标签、形态特征/分布习性/发现信息三个手账信息卡、生成卡片与收入图鉴按钮；收藏写入本地缓存，重复收藏有提示；首页最近发现项可跳转结果页只读模式。同时抽出公共格式化工具 `utils/format.js`，api 层补充收藏与单条记录查询接口。
+- **模块**：
+  - `curious-field-guide/pages/result/`（result.js / wxml / wxss / json，全新实现）
+  - `curious-field-guide/pages/index/index.js`（拍照后 mock 识别并跳转、最近发现跳转结果页）
+  - `curious-field-guide/utils/format.js`（新建：时间格式化与标签解析）
+  - `curious-field-guide/utils/api.js`（新增 getDiscoveryById / getCollections / addCollection）
+- **备注**：
+  - JS 与 JSON 语法检查全部通过。
+  - 验证方式：编译后点击首页拍照区 → 选「拍照」或「从相册选择」→ 应进入识别结果页，显示照片对比、物种名、标签、信息卡；点击「收入图鉴」按钮变为「已收入图鉴」；返回首页点击最近发现列表项，应进入同一页面的只读模式。
+  - 「生成卡片」为占位提示，分享卡片页后续轮次实现。
+
+---
+
 ## 2026-08-05 09:02
 
 - **描述**：标签文字仍偏上，继续把 `.tag`、`.mini-tag`、`.rarity-tag` 的 `line-height` 从 `1.2` 调整为 `1.6`，使文字在胶囊内视觉居中。

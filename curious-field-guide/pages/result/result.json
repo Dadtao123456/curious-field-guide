@@ -1,3 +1,7 @@
 {
-  "navigationBarTitleText": "识别结果"
+  "navigationBarTitleText": "识别结果",
+  "usingComponents": {
+    "rarity-tags": "/components/rarity-tags/rarity-tags",
+    "privacy-modal": "/components/privacy-modal/privacy-modal"
+  }
 }

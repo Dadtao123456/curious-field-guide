@@ -209,10 +209,7 @@ Page({
    * 隐私弹窗：同意并继续
    */
   onPrivacyAgree() {
-    const app = getApp();
-    if (app && app.agreePrivacyPolicy) {
-      app.agreePrivacyPolicy();
-    }
+    auth.agreePrivacy();
     this.setData({ showPrivacyModal: false, isBrowseOnly: false });
   },
 
@@ -220,10 +217,7 @@ Page({
    * 隐私弹窗：仅浏览
    */
   onPrivacyBrowseOnly() {
-    const app = getApp();
-    if (app && app.chooseBrowseOnly) {
-      app.chooseBrowseOnly();
-    }
+    auth.chooseBrowseOnly();
     this.setData({ showPrivacyModal: false, isBrowseOnly: true });
   },
 

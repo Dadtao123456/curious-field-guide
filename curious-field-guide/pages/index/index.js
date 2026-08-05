@@ -208,10 +208,7 @@ Page({
    * 用户同意隐私政策
    */
   onPrivacyAgree() {
-    const app = getApp();
-    if (app && app.agreePrivacyPolicy) {
-      app.agreePrivacyPolicy();
-    }
+    auth.agreePrivacy();
     this.setData({
       showPrivacyModal: false,
       isBrowseOnly: false
@@ -222,10 +219,7 @@ Page({
    * 用户选择仅浏览
    */
   onPrivacyBrowseOnly() {
-    const app = getApp();
-    if (app && app.chooseBrowseOnly) {
-      app.chooseBrowseOnly();
-    }
+    auth.chooseBrowseOnly();
     this.setData({
       showPrivacyModal: false,
       isBrowseOnly: true

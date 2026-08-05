@@ -15,7 +15,7 @@
   font-size: var(--text-badge);
   font-weight: 700;
   font-family: var(--font-hand);
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .tag-green {

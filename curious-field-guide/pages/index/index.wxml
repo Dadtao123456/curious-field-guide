@@ -24,11 +24,6 @@
     </view>
   </view>
 
-  <!-- 连续天数 pill -->
-  <view class="streak-pill" wx:if="{{dashboard.streakCount >= 3}}">
-    <text class="streak-text">🔥 连续 {{dashboard.streakCount}} 天</text>
-  </view>
-
   <!-- 最近发现列表 -->
   <view class="recent-section mt-xl" wx:if="{{dashboard.recentDiscoveries.length > 0}}">
     <view class="section-header">

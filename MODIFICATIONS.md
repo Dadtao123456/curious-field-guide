@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-08-05 08:55
+
+- **描述**：根据产品侧反馈，去掉首页「连续 N 天」streak pill；修复最近发现卡片中蜡笔标签文字垂直偏上的问题，将全局 `.tag`、`.mini-tag`、`.rarity-tag` 的 `line-height` 从 `1` 调整为 `1.2`，使文字在胶囊内视觉居中。
+- **模块**：
+  - `curious-field-guide/pages/index/index.wxml`
+  - `curious-field-guide/pages/index/index.wxss`
+  - `curious-field-guide/app.wxss`
+  - `curious-field-guide/components/rarity-tags/rarity-tags.wxss`
+- **备注**：
+  - JS 与 JSON 语法检查通过。
+  - 重新编译后，首页应不再显示「连续 12 天」橙色 pill；最近发现列表中的「首次发现」「连续 12 天」等标签文字应在胶囊内垂直居中。
+
+---
+
 ## 2026-08-05 08:43
 
 - **描述**：完成第 2 轮增量交付：按产品侧提供的《好奇图鉴_手绘风格设计规范》把首页、稀有度标签、隐私弹窗、底部 tabBar 图标统一改成手账素描风。全局样式与颜色常量同步替换为纸张白/铅笔灰/蜡笔功能色，首页新增虚线 Slogan 横幅、手绘双层边框拍照区、蜡笔标签的最近发现卡片，tabBar 图标用 Python 重新生成为粗描边 PNG。

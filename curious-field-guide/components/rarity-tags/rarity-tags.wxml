@@ -1,11 +1,11 @@
-<!-- 稀有度标签组件 -->
-<!-- 说明：接收标签数组，按统一样式渲染胶囊标签 -->
+<!-- 稀有度标签组件（手账风格） -->
+<!-- 说明：接收标签对象数组，按统一样式渲染蜡笔色块标签 -->
 
 <view class="rarity-tags" wx:if="{{tags.length > 0}}">
   <view
     wx:for="{{tags}}"
     wx:key="index"
-    class="rarity-tag tag tag-{{item.color}}"
+    class="rarity-tag tag-{{item.color}}"
   >
     {{item.label}}
   </view>

@@ -9,10 +9,10 @@
     "pages/privacy/privacy"
   ],
   "tabBar": {
-    "color": "#9CA3AF",
-    "selectedColor": "#3D8B5E",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "white",
+    "color": "#888888",
+    "selectedColor": "#3a3a3a",
+    "backgroundColor": "#faf8f3",
+    "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/index/index",
@@ -35,10 +35,10 @@
     ]
   },
   "window": {
-    "navigationBarBackgroundColor": "#FAFBF7",
+    "navigationBarBackgroundColor": "#faf8f3",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "好奇图鉴",
-    "backgroundColor": "#FAFBF7",
+    "backgroundColor": "#faf8f3",
     "backgroundTextStyle": "dark"
   },
   "permission": {

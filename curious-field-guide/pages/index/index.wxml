@@ -1,12 +1,27 @@
-<!-- 好奇图鉴 - 首页（发现页） -->
+<!-- 好奇图鉴 - 首页（发现页）手账风格 -->
 <!-- 数据流：onLoad 调用 api.getDashboard → setData 更新页面 → 用户交互触发拍照/弹窗 -->
 
 <view class="page-container index-page">
   <!-- 顶部品牌区 -->
   <view class="index-header">
     <text class="text-page-title">好奇图鉴</text>
-    <text class="text-page-subtitle mt-sm">珍惜你的每一次好奇心</text>
-    <text class="text-caption mt-md">你已累计发现 {{dashboard.totalDiscoveries}} 个物种</text>
+    <text class="index-subtitle">你已累计发现 {{dashboard.totalDiscoveries}} 个物种</text>
+  </view>
+
+  <!-- Slogan 横幅 -->
+  <view class="slogan-box mt-md">
+    <text class="text-hint">"珍惜你的每一次好奇心"</text>
+  </view>
+
+  <!-- 中央拍照入口 -->
+  <view class="camera-entry-wrapper mt-lg">
+    <view class="camera-entry {{isBrowseOnly ? 'camera-entry-disabled' : ''}}" bindtap="onCameraEntryTap">
+      <view class="camera-icon-wrap">
+        <text class="camera-icon">📷</text>
+      </view>
+      <text class="camera-title">拍一张，认识它</text>
+      <text class="camera-desc">支持昆虫、植物、鸟类、菌类、动物</text>
+    </view>
   </view>
 
   <!-- 连续天数 pill -->
@@ -14,17 +29,8 @@
     <text class="streak-text">🔥 连续 {{dashboard.streakCount}} 天</text>
   </view>
 
-  <!-- 中央拍照入口 -->
-  <view class="camera-entry-wrapper">
-    <view class="camera-entry {{isBrowseOnly ? 'camera-entry-disabled' : ''}}" bindtap="onCameraEntryTap">
-      <text class="camera-icon">📷</text>
-      <text class="camera-title">拍一张，认识它</text>
-      <text class="camera-desc">支持昆虫、植物、鸟类、菌类、动物</text>
-    </view>
-  </view>
-
   <!-- 最近发现列表 -->
-  <view class="recent-section" wx:if="{{dashboard.recentDiscoveries.length > 0}}">
+  <view class="recent-section mt-xl" wx:if="{{dashboard.recentDiscoveries.length > 0}}">
     <view class="section-header">
       <text class="text-section-title">最近发现</text>
       <text class="section-more" bindtap="onViewAll">查看全部 ></text>
@@ -38,10 +44,22 @@
         bindtap="onRecentItemTap"
         data-id="{{item.id}}"
       >
-        <text class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>
+        <view class="recent-thumb">
+          <text class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>
+        </view>
         <view class="recent-info">
-          <text class="recent-name">{{item.speciesName}}</text>
-          <text class="recent-meta">{{item.location}} ・ {{item.discoveredAtText}}</text>
+          <view class="recent-name-row">
+            <text class="recent-name">{{item.speciesName}}</text>
+            <view class="recent-tags" wx:if="{{item.tags.length > 0}}">
+              <view
+                wx:for="{{item.tags}}"
+                wx:for-item="tag"
+                wx:key="index"
+                class="mini-tag mini-tag-{{tag.color}}"
+              >{{tag.label}}</view>
+            </view>
+          </view>
+          <text class="recent-meta">{{item.categoryLabel}} · {{item.discoveredAtText}} · {{item.location}}</text>
         </view>
       </view>
     </view>
@@ -50,7 +68,7 @@
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{dashboard.recentDiscoveries.length === 0}}">
     <text class="empty-icon">🌱</text>
-    <text class="text-caption">还没有发现，快去拍第一张吧</text>
+    <text class="text-hint">还没有发现，快去拍第一张吧</text>
   </view>
 </view>
 

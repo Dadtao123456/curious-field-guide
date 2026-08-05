@@ -1,70 +1,95 @@
-/* 好奇图鉴 - 全局样式表 */
+/* 好奇图鉴 - 全局样式表（手账素描风） */
 
-/* 1. CSS 变量：颜色系统 */
+/* 1. CSS 变量：手账色彩与质感系统 */
 page {
-  --color-primary: #3D8B5E;
-  --color-primary-dark: #2C6E4B;
-  --color-primary-light: #E8F5E9;
+  /* 纸张与铅笔 */
+  --paper: #faf8f3;
+  --pencil: #3a3a3a;
+  --gray: #888888;
+  --light-gray: #999999;
+  --cream: #f5f5f0;
+  --white: #ffffff;
 
-  --color-bg-page: #FAFBF7;
-  --color-bg-card: #FFFFFF;
-  --color-border: #EDF0E9;
+  /* 蜡笔功能色 */
+  --green: #4a9b5c;
+  --green-bg: rgba(74, 155, 92, 0.12);
+  --orange: #c9a227;
+  --orange-bg: rgba(201, 162, 39, 0.12);
+  --purple: #7c5bbf;
+  --purple-bg: rgba(124, 91, 191, 0.12);
+  --blue: #4a7c9b;
+  --blue-bg: rgba(74, 124, 155, 0.12);
+  --red: #b85450;
+  --red-bg: rgba(184, 84, 80, 0.12);
 
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
+  /* 字号 */
+  --font-hand: 'Courier New', Menlo, Monaco, monospace;
 
-  --color-first-discovery: #10B981;
-  --color-first-discovery-dark: #047857;
-  --color-first-discovery-light: rgba(16, 185, 129, 0.12);
+  --text-h1: 52rpx;
+  --text-h2: 44rpx;
+  --text-h3: 36rpx;
+  --text-h4: 28rpx;
+  --text-body: 26rpx;
+  --text-caption: 24rpx;
+  --text-small: 22rpx;
+  --text-badge: 22rpx;
 
-  --color-streak: #F59E0B;
-  --color-streak-dark: #B45309;
-  --color-streak-light: rgba(245, 158, 11, 0.12);
+  /* 间距 */
+  --space-xs: 8rpx;
+  --space-sm: 16rpx;
+  --space-md: 24rpx;
+  --space-lg: 32rpx;
+  --space-xl: 40rpx;
+  --space-xxl: 48rpx;
 
-  --color-night: #8B5CF6;
-  --color-night-dark: #6D28D9;
-  --color-night-light: rgba(139, 92, 246, 0.12);
+  /* 边框：粗线 + 不对称圆角 */
+  --border-width: 5rpx;
+  --border-width-lg: 6rpx;
+  --border-width-sm: 4rpx;
+  --border-color: #3a3a3a;
+  --radius-lg: 8rpx 48rpx 16rpx 40rpx;
+  --radius-md: 8rpx 32rpx 16rpx 24rpx;
+  --radius-sm: 12rpx 6rpx 16rpx 10rpx;
+  --radius-pill: 32rpx 12rpx 28rpx 16rpx;
+  --radius-circle: 50%;
 
-  --color-warning: #E9C46A;
-  --color-warning-dark: #92400E;
-  --color-warning-light: #FEF3C7;
+  /* 动画 */
+  --transition-fast: 0.15s ease;
 
-  --color-error: #EF4444;
-  --color-error-dark: #991B1B;
-
-  --spacing-xs: 8rpx;
-  --spacing-sm: 16rpx;
-  --spacing-md: 24rpx;
-  --spacing-lg: 32rpx;
-  --spacing-xl: 48rpx;
-
-  --radius-sm: 16rpx;
-  --radius-md: 24rpx;
-  --radius-pill: 9999rpx;
-
-  --shadow-card: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
-  --shadow-button: 0 8rpx 24rpx rgba(61, 139, 94, 0.25);
-
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background-color: var(--color-bg-page);
-  color: var(--color-text-primary);
+  font-family: var(--font-hand);
+  background-color: var(--paper);
+  color: var(--pencil);
   box-sizing: border-box;
 }
 
 /* 2. 页面容器 */
 .page-container {
   min-height: 100vh;
-  padding: var(--spacing-xl) var(--spacing-lg);
+  padding: var(--space-xxl) var(--space-xl);
   box-sizing: border-box;
+  background-color: var(--paper);
 }
 
-/* 3. 通用卡片 */
+/* 3. 通用卡片：双层边框模拟手绘厚度 */
 .card {
-  background-color: var(--color-bg-card);
+  position: relative;
+  background-color: var(--white);
+  border: var(--border-width) solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  box-shadow: var(--shadow-card);
+  padding: var(--space-md);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  right: -8rpx;
+  bottom: -8rpx;
+  border: 2rpx solid var(--border-color);
+  border-radius: 12rpx 30rpx 18rpx 22rpx;
+  pointer-events: none;
+  opacity: 0.08;
 }
 
 /* 4. 按钮 */
@@ -72,124 +97,158 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-pill);
-  font-weight: 600;
-  transition: opacity 0.1s ease;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  transition: transform var(--transition-fast);
 }
 
 .btn:active {
-  opacity: 0.9;
+  transform: rotate(1deg) scale(0.98);
 }
 
 .btn-primary {
-  height: 96rpx;
-  background-color: var(--color-primary);
-  color: #FFFFFF;
-  font-size: 32rpx;
-  box-shadow: var(--shadow-button);
+  height: 88rpx;
+  background-color: var(--pencil);
+  color: var(--paper);
+  font-size: 30rpx;
 }
 
 .btn-primary:active {
-  background-color: var(--color-primary-dark);
+  background-color: var(--pencil);
 }
 
 .btn-secondary {
-  height: 80rpx;
-  background-color: var(--color-bg-card);
-  color: var(--color-primary);
-  font-size: 28rpx;
-  border: 2rpx solid var(--color-primary);
+  height: 88rpx;
+  background-color: var(--white);
+  color: var(--pencil);
+  font-size: 30rpx;
 }
 
 .btn-secondary:active {
-  background-color: var(--color-primary-light);
+  background-color: var(--cream);
 }
 
 .btn-disabled {
-  background-color: #A7F3D0;
-  color: #FFFFFF;
-  box-shadow: none;
+  opacity: 0.5;
 }
 
 /* 5. 文字层级 */
 .text-page-title {
-  font-size: 48rpx;
-  font-weight: bold;
-  line-height: 64rpx;
-  color: var(--color-text-primary);
+  font-size: var(--text-h1);
+  font-weight: 700;
+  line-height: 72rpx;
+  color: var(--pencil);
+  transform: rotate(-1deg);
+  transform-origin: left center;
 }
 
 .text-page-subtitle {
-  font-size: 24rpx;
-  line-height: 36rpx;
-  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: 40rpx;
+  color: var(--gray);
 }
 
 .text-section-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  line-height: 48rpx;
-  color: var(--color-text-primary);
+  font-size: var(--text-h3);
+  font-weight: 700;
+  line-height: 52rpx;
+  color: var(--pencil);
+  transform: rotate(-0.5deg);
+  transform-origin: left center;
 }
 
 .text-card-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  line-height: 44rpx;
-  color: var(--color-text-primary);
+  font-size: var(--text-h4);
+  font-weight: 700;
+  line-height: 40rpx;
+  color: var(--pencil);
 }
 
 .text-body {
-  font-size: 28rpx;
-  line-height: 44rpx;
-  color: var(--color-text-primary);
+  font-size: var(--text-body);
+  line-height: 40rpx;
+  color: var(--pencil);
 }
 
 .text-caption {
-  font-size: 24rpx;
+  font-size: var(--text-caption);
   line-height: 36rpx;
-  color: var(--color-text-secondary);
+  color: var(--gray);
 }
 
 .text-small {
-  font-size: 22rpx;
+  font-size: var(--text-small);
   line-height: 32rpx;
-  color: var(--color-text-tertiary);
+  color: var(--light-gray);
 }
 
-/* 6. 标签 / 胶囊 */
+.text-hint {
+  font-size: var(--text-caption);
+  line-height: 36rpx;
+  color: var(--light-gray);
+  font-style: italic;
+}
+
+/* 6. 标签 / 胶囊（蜡笔色块） */
 .tag {
   display: inline-flex;
   align-items: center;
-  height: 40rpx;
-  padding: 0 16rpx;
-  border-radius: 20rpx;
-  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border: var(--border-width-sm) solid;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-badge);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  line-height: 1;
 }
 
-.tag-first-discovery {
-  background-color: var(--color-first-discovery-light);
-  color: var(--color-first-discovery-dark);
+.tag-green {
+  border-color: var(--green);
+  background-color: var(--green-bg);
+  color: var(--green);
+  transform: rotate(1deg);
 }
 
-.tag-streak {
-  background-color: var(--color-streak-light);
-  color: var(--color-streak-dark);
+.tag-orange {
+  border-color: var(--orange);
+  background-color: var(--orange-bg);
+  color: var(--orange);
+  transform: rotate(-1deg);
 }
 
-.tag-night {
-  background-color: var(--color-night-light);
-  color: var(--color-night-dark);
+.tag-purple {
+  border-color: var(--purple);
+  background-color: var(--purple-bg);
+  color: var(--purple);
+  transform: rotate(0.5deg);
+}
+
+.tag-blue {
+  border-color: var(--blue);
+  background-color: var(--blue-bg);
+  color: var(--blue);
+  transform: rotate(-0.5deg);
+}
+
+.tag-red {
+  border-color: var(--red);
+  background-color: var(--red-bg);
+  color: var(--red);
+  transform: rotate(1deg);
 }
 
 /* 7. 通用间距工具类 */
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
 
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
 
 .flex-center {
   display: flex;
@@ -201,4 +260,23 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* 8. 手写图标容器 */
+.icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 12rpx 20rpx 16rpx 16rpx;
+  background-color: var(--cream);
+  transform: rotate(-2deg);
+}
+
+/* 9. slogan 虚线框 */
+.slogan-box {
+  border: 4rpx dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
 }

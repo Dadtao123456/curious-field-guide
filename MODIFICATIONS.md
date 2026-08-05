@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-08-05 08:43
+
+- **描述**：完成第 2 轮增量交付：按产品侧提供的《好奇图鉴_手绘风格设计规范》把首页、稀有度标签、隐私弹窗、底部 tabBar 图标统一改成手账素描风。全局样式与颜色常量同步替换为纸张白/铅笔灰/蜡笔功能色，首页新增虚线 Slogan 横幅、手绘双层边框拍照区、蜡笔标签的最近发现卡片，tabBar 图标用 Python 重新生成为粗描边 PNG。
+- **模块**：
+  - `curious-field-guide/app.wxss`
+  - `curious-field-guide/app.json`
+  - `curious-field-guide/utils/constants.js`
+  - `curious-field-guide/pages/index/index.wxml`
+  - `curious-field-guide/pages/index/index.wxss`
+  - `curious-field-guide/pages/index/index.js`
+  - `curious-field-guide/components/rarity-tags/rarity-tags.wxml`
+  - `curious-field-guide/components/rarity-tags/rarity-tags.wxss`
+  - `curious-field-guide/components/privacy-modal/privacy-modal.wxml`
+  - `curious-field-guide/components/privacy-modal/privacy-modal.wxss`
+  - `curious-field-guide/images/tabbar/*.png`
+- **备注**：
+  - JS 与 JSON 语法检查全部通过。
+  - 验证方式：用微信开发者工具打开 `curious-field-guide` 文件夹，点击编译，应看到米色纸张背景、铅笔灰描边、首页 Slogan 虚线框、粗边框拍照区、蜡笔色标签的最近发现卡片、描边 tabBar 图标；点击拍照按钮仍弹出「拍照 / 从相册选择」选择器。
+  - 图鉴页、结果页、我的页仍为占位页，后续轮次按手绘风格继续改造。
+
+---
+
 ## 2026-08-04 23:20
 
 - **描述**：完成第 1 轮增量交付：搭建微信小程序项目骨架、实现首页静态 UI、创建通用组件（隐私弹窗、稀有度标签）、补充数据库设计文档，并生成 tabBar 占位图标。所有页面文件已就位，代码均走 mock 数据，未接入真实识别与云开发。

@@ -1,4 +1,4 @@
-<!-- 隐私政策弹窗组件 -->
+<!-- 隐私政策弹窗组件（手账风格） -->
 <!-- 说明：首次启动或仅浏览模式下点击敏感功能时弹出 -->
 
 <view class="privacy-mask" wx:if="{{visible}}" bindtap="onMaskTap">

@@ -1,32 +1,54 @@
-/* 稀有度标签组件样式 */
+/* 稀有度标签组件样式（手账风格） */
 
 .rarity-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
 }
 
 .rarity-tag {
   display: inline-flex;
   align-items: center;
-  height: 40rpx;
-  padding: 0 16rpx;
-  border-radius: 20rpx;
-  font-size: 24rpx;
-  line-height: 40rpx;
+  padding: 6rpx 18rpx;
+  border: var(--border-width) solid;
+  border-radius: 16rpx 8rpx 20rpx 12rpx;
+  font-size: var(--text-badge);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  line-height: 1;
 }
 
 .tag-green {
-  background-color: var(--color-first-discovery-light);
-  color: var(--color-first-discovery-dark);
+  border-color: var(--green);
+  background-color: var(--green-bg);
+  color: var(--green);
+  transform: rotate(1deg);
 }
 
 .tag-orange {
-  background-color: var(--color-streak-light);
-  color: var(--color-streak-dark);
+  border-color: var(--orange);
+  background-color: var(--orange-bg);
+  color: var(--orange);
+  transform: rotate(-1deg);
 }
 
 .tag-purple {
-  background-color: var(--color-night-light);
-  color: var(--color-night-dark);
+  border-color: var(--purple);
+  background-color: var(--purple-bg);
+  color: var(--purple);
+  transform: rotate(0.5deg);
+}
+
+.tag-blue {
+  border-color: var(--blue);
+  background-color: var(--blue-bg);
+  color: var(--blue);
+  transform: rotate(-0.5deg);
+}
+
+.tag-red {
+  border-color: var(--red);
+  background-color: var(--red-bg);
+  color: var(--red);
+  transform: rotate(1deg);
 }

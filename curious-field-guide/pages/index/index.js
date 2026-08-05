@@ -3,7 +3,31 @@
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
-const { CATEGORY_LIST } = require('../../utils/constants');
+const { CATEGORIES, CATEGORY_LIST } = require('../../utils/constants');
+
+/**
+ * 将稀有度标签字符串数组解析为 { label, color }
+ * 说明：按 PRD 与设计规范映射颜色
+ * @param {Array<String>} tags
+ * @returns {Array<Object>}
+ */
+function parseRarityTags(tags) {
+  if (!Array.isArray(tags) || tags.length === 0) return [];
+
+  return tags.map(tag => {
+    const label = String(tag);
+    if (label.includes('首次')) {
+      return { label, color: 'green' };
+    }
+    if (label.includes('连续') || label.includes('streak')) {
+      return { label, color: 'orange' };
+    }
+    if (label.includes('夜间')) {
+      return { label, color: 'purple' };
+    }
+    return { label, color: 'blue' };
+  });
+}
 
 /**
  * 格式化发现时间
@@ -87,7 +111,9 @@ Page({
     api.getDashboard().then(res => {
       const recentDiscoveries = res.recentDiscoveries.map(item => ({
         ...item,
-        discoveredAtText: formatDiscoveryTime(item.discoveredAt)
+        categoryLabel: (CATEGORIES[item.category.toUpperCase()] && CATEGORIES[item.category.toUpperCase()].label) || item.category,
+        discoveredAtText: formatDiscoveryTime(item.discoveredAt),
+        tags: parseRarityTags(item.rarityTags || [])
       }));
 
       this.setData({

@@ -140,22 +140,21 @@ const BADGES = {
 const BADGE_LIST = Object.values(BADGES);
 
 /**
- * 颜色映射（与 app.wxss 中的 CSS 变量保持一致）
+ * 颜色映射（与 app.wxss 中的 CSS 变量保持一致，手账风格）
  */
 const COLORS = {
-  primary: '#3D8B5E',
-  primaryDark: '#2C6E4B',
-  primaryLight: '#E8F5E9',
-  bgPage: '#FAFBF7',
-  bgCard: '#FFFFFF',
-  border: '#EDF0E9',
-  textPrimary: '#1F2937',
-  textSecondary: '#6B7280',
-  textTertiary: '#9CA3AF',
+  paper: '#faf8f3',
+  pencil: '#3a3a3a',
+  gray: '#888888',
+  lightGray: '#999999',
+  cream: '#f5f5f0',
+  white: '#ffffff',
   tagColors: {
-    green: { bg: 'rgba(16, 185, 129, 0.12)', text: '#047857' },
-    orange: { bg: 'rgba(245, 158, 11, 0.12)', text: '#B45309' },
-    purple: { bg: 'rgba(139, 92, 246, 0.12)', text: '#6D28D9' }
+    green: { bg: 'rgba(74, 155, 92, 0.12)', text: '#4a9b5c', border: '#4a9b5c' },
+    orange: { bg: 'rgba(201, 162, 39, 0.12)', text: '#c9a227', border: '#c9a227' },
+    purple: { bg: 'rgba(124, 91, 191, 0.12)', text: '#7c5bbf', border: '#7c5bbf' },
+    blue: { bg: 'rgba(74, 124, 155, 0.12)', text: '#4a7c9b', border: '#4a7c9b' },
+    red: { bg: 'rgba(184, 84, 80, 0.12)', text: '#b85450', border: '#b85450' }
   }
 };
 

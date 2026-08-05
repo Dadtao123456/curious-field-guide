@@ -37,38 +37,8 @@ function shouldShowPrivacyModal() {
 }
 
 /**
- * 请求相机权限
- * 说明：拍照识别前调用
- * @returns {Promise<Boolean>}
- */
-function requestCameraPermission() {
-  return new Promise((resolve) => {
-    wx.authorize({
-      scope: 'scope.camera',
-      success: () => resolve(true),
-      fail: () => resolve(false)
-    });
-  });
-}
-
-/**
- * 请求相册权限
- * 说明：从相册选择照片前调用
- * @returns {Promise<Boolean>}
- */
-function requestPhotoAlbumPermission() {
-  return new Promise((resolve) => {
-    wx.authorize({
-      scope: 'scope.writePhotosAlbum',
-      success: () => resolve(true),
-      fail: () => resolve(false)
-    });
-  });
-}
-
-/**
- * 请求地理位置权限
- * 说明：记录发现地点前调用
+ * 请求地理位置权限（预留）
+ * 说明：记录发现地点时调用；拍照/相册权限由 wx.chooseImage 流程自动触发系统授权，无需预申请
  * @returns {Promise<Boolean>}
  */
 function requestLocationPermission() {
@@ -85,7 +55,5 @@ module.exports = {
   hasAgreedPrivacy,
   isBrowseOnly,
   shouldShowPrivacyModal,
-  requestCameraPermission,
-  requestPhotoAlbumPermission,
   requestLocationPermission
 };

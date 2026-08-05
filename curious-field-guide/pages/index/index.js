@@ -133,7 +133,7 @@ Page({
         this.identifyAndNavigate(res.tempFilePaths[0]);
       },
       fail: (error) => {
-        console.error('[index] 拍照失败', error);
+        this.handleChooseImageFail(error);
       }
     });
   },
@@ -150,7 +150,34 @@ Page({
         this.identifyAndNavigate(res.tempFilePaths[0]);
       },
       fail: (error) => {
-        console.error('[index] 相册选择失败', error);
+        this.handleChooseImageFail(error);
+      }
+    });
+  },
+
+  /**
+   * 处理选图失败
+   * 说明：用户主动取消不提示；权限被拒绝时弹窗引导去系统设置开启
+   * @param {Object} error - chooseImage 的 fail 回调参数
+   */
+  handleChooseImageFail(error) {
+    const errMsg = (error && error.errMsg) || '';
+
+    // 用户主动取消，静默处理
+    if (errMsg.includes('cancel')) {
+      return;
+    }
+
+    console.error('[index] 选图失败', error);
+    wx.showModal({
+      title: '无法获取照片',
+      content: '请在设置中允许访问相机或相册，才能拍照识别',
+      confirmText: '去设置',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          wx.openSetting();
+        }
       }
     });
   },

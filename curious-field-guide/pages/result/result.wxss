@@ -44,6 +44,13 @@
   font-size: 72rpx;
 }
 
+.photo-pending {
+  font-size: var(--text-small);
+  color: var(--gray);
+  font-family: var(--font-hand);
+  margin-top: var(--space-xs);
+}
+
 .photo-label {
   font-size: var(--text-small);
   color: var(--gray);
@@ -106,4 +113,142 @@
   flex: 1;
   height: 88rpx;
   font-size: 30rpx;
+}
+
+/* 提示条（低置信度 / 菌类参考） */
+.notice-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border: var(--border-width) solid var(--orange);
+  border-radius: var(--radius-md);
+  background-color: var(--orange-bg);
+  transform: rotate(-0.5deg);
+  margin-bottom: var(--space-md);
+}
+
+.notice-text {
+  font-size: var(--text-caption);
+  color: var(--orange);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  line-height: 36rpx;
+}
+
+.notice-actions {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.notice-link {
+  font-size: var(--text-caption);
+  color: var(--pencil);
+  font-weight: 700;
+  font-family: var(--font-hand);
+  text-decoration: underline;
+}
+
+/* 其他可能候选区 */
+.alternatives {
+  border: var(--border-width) dashed var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.alternatives-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.alternatives-title {
+  font-size: var(--text-h4);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+.alternatives-arrow {
+  font-size: var(--text-caption);
+  color: var(--gray);
+}
+
+.alternatives-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-sm);
+}
+
+.alternative-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-top: 2rpx dashed var(--cream);
+}
+
+.alternative-item:active {
+  opacity: 0.7;
+}
+
+.alternative-name {
+  font-size: var(--text-body);
+  color: var(--pencil);
+  font-weight: 700;
+  font-family: var(--font-hand);
+}
+
+.alternative-confidence {
+  font-size: var(--text-small);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 识别失败态 */
+.result-failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+}
+
+.failed-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  border: var(--border-width) dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.failed-icon {
+  font-size: 96rpx;
+  transform: rotate(-3deg);
+}
+
+.failed-title {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  transform: rotate(-0.5deg);
+}
+
+.failed-desc {
+  font-size: var(--text-body);
+  color: var(--gray);
+  font-family: var(--font-hand);
+  text-align: center;
+  line-height: 44rpx;
+}
+
+.failed-actions {
+  display: flex;
+  gap: var(--space-md);
+  width: 100%;
+  margin-top: var(--space-md);
 }

@@ -1,11 +1,14 @@
 // 好奇图鉴 - 识别结果页逻辑
-// 数据流：onLoad 按 mode 读取识别结果/发现记录 → setData 渲染 → 用户点击收藏/生成卡片
+// 数据流：onLoad 按 mode 读取识别结果/发现记录 → setData 渲染 → 用户点击收藏/生成卡片/切换候选
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
 const { CATEGORIES } = require('../../utils/constants');
 const { calculateRarityTags } = require('../../utils/gamification');
 const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
+
+// 低置信度阈值（PRD：置信度 < 0.6 展示黄色提示条）
+const LOW_CONFIDENCE_THRESHOLD = 0.6;
 
 Page({
   /**
@@ -16,6 +19,19 @@ Page({
     mode: 'identify',
     // 是否仅浏览模式（收藏需再次确认隐私）
     isBrowseOnly: false,
+    // 识别是否失败（展示失败页分支）
+    isFailed: false,
+    // 失败提示文案
+    failMessage: '',
+    // 是否为低置信度结果（展示「识别不确定」黄条）
+    isUncertain: false,
+    // 是否为菌类结果（展示「仅供参考」黄条）
+    isFungi: false,
+    // 识别置信度（0~1，用于展示）
+    confidenceText: '',
+    // 「其他可能」候选列表与展开状态
+    alternatives: [],
+    alternativesExpanded: false,
     // 当前物种是否已收入图鉴
     isCollected: false,
     // 是否显示隐私政策弹窗
@@ -75,29 +91,34 @@ Page({
       result = null;
     }
 
-    if (!result || !result.species) {
+    if (!result) {
       wx.showToast({ title: '识别结果不存在', icon: 'none' });
       return;
     }
 
-    Promise.all([api.getDashboard(), api.getCollections()]).then(([dashboard, collections]) => {
-      const existingKeys = collections.map(item => item.speciesKey);
-      const tags = calculateRarityTags(
-        result.species.speciesKey,
-        existingKeys,
-        dashboard.streakCount,
-        result.discoveredAt
-      );
-
-      this.fillPage({
-        species: result.species,
-        description: result.description,
-        habitat: result.habitat,
-        userPhotoUrl: result.userPhotoUrl || '',
-        tags,
-        location: result.location,
-        discoveredAt: result.discoveredAt
+    // 失败分支：所有来源均无有效结果
+    if (!result.success) {
+      this.setData({
+        isFailed: true,
+        failMessage: result.message || '暂时无法识别，可能是新物种，也可能是照片不够清晰',
+        userPhotoUrl: result.userPhotoUrl || ''
       });
+      return;
+    }
+
+    this.setData({
+      userPhotoUrl: result.userPhotoUrl || '',
+      isUncertain: (result.confidence || 0) < LOW_CONFIDENCE_THRESHOLD,
+      isFungi: result.species.category === 'fungi',
+      confidenceText: (result.confidence || 0).toFixed(2),
+      alternatives: result.alternatives || []
+    });
+
+    this.renderSpecies(result.species, {
+      description: result.description,
+      habitat: result.habitat,
+      location: result.location,
+      discoveredAt: result.discoveredAt
     });
   },
 
@@ -107,23 +128,25 @@ Page({
    */
   loadDiscovery(id) {
     api.getDiscoveryById(id).then(record => {
-      this.fillPage({
-        species: {
-          name: record.speciesName,
-          latinName: record.latinName,
-          speciesKey: record.speciesKey,
-          category: record.category,
-          order: record.order,
-          family: record.family
-        },
-        description: record.description,
-        habitat: record.habitat,
+      this.setData({
         userPhotoUrl: record.userPhotoUrl || '',
+        isFungi: record.category === 'fungi',
         tags: parseRarityTags(record.rarityTags || []),
-        location: record.location,
-        discoveredAt: record.discoveredAt,
-        readonly: true
+        discovery: {
+          location: record.location || '未知地点',
+          discoveredAtText: formatDiscoveryTime(record.discoveredAt)
+        },
+        isCollected: true
       });
+
+      this.fillSpecies({
+        name: record.speciesName,
+        latinName: record.latinName,
+        speciesKey: record.speciesKey,
+        category: record.category,
+        order: record.order,
+        family: record.family
+      }, record.description, record.habitat);
     }).catch(error => {
       console.error('[result] 加载发现记录失败', error);
       wx.showToast({ title: '记录不存在', icon: 'none' });
@@ -131,32 +154,108 @@ Page({
   },
 
   /**
-   * 统一填充页面数据
-   * @param {Object} payload
+   * 渲染物种信息（识别模式：需要计算稀有度标签）
+   * @param {Object} species - 物种对象
+   * @param {Object} extra - { description, habitat, location, discoveredAt }
    */
-  fillPage(payload) {
-    const categoryInfo = CATEGORIES[String(payload.species.category || '').toUpperCase()] || {};
+  renderSpecies(species, extra) {
+    Promise.all([api.getDashboard(), api.getCollections()]).then(([dashboard, collections]) => {
+      const existingKeys = collections.map(item => item.speciesKey);
+      const tags = calculateRarityTags(
+        species.speciesKey,
+        existingKeys,
+        dashboard.streakCount,
+        extra.discoveredAt
+      );
+
+      this.setData({
+        tags,
+        discovery: {
+          location: extra.location || '未知地点',
+          discoveredAtText: formatDiscoveryTime(extra.discoveredAt)
+        }
+      });
+      this.fillSpecies(species, extra.description, extra.habitat);
+    });
+  },
+
+  /**
+   * 填充物种展示字段
+   * @param {Object} species
+   * @param {String} description
+   * @param {String} habitat
+   */
+  fillSpecies(species, description, habitat) {
+    const categoryInfo = CATEGORIES[String(species.category || '').toUpperCase()] || {};
 
     this.setData({
-      userPhotoUrl: payload.userPhotoUrl,
       categoryEmoji: categoryInfo.emoji || '🔍',
       species: {
-        name: payload.species.name,
-        latinName: payload.species.latinName,
-        speciesKey: payload.species.speciesKey,
-        category: payload.species.category,
+        name: species.name,
+        latinName: species.latinName,
+        speciesKey: species.speciesKey,
+        category: species.category,
         categoryLabel: categoryInfo.label || '',
-        order: payload.species.order || '',
-        family: payload.species.family || '',
-        description: payload.description || '',
-        habitat: payload.habitat || ''
-      },
-      tags: payload.tags || [],
-      discovery: {
-        location: payload.location || '未知地点',
-        discoveredAtText: formatDiscoveryTime(payload.discoveredAt)
-      },
-      isCollected: !!payload.readonly
+        order: species.order || '',
+        family: species.family || '',
+        description: description || '',
+        habitat: habitat || ''
+      }
+    });
+  },
+
+  /**
+   * 展开/收起「其他可能」候选区
+   */
+  onToggleAlternatives() {
+    this.setData({
+      alternativesExpanded: !this.data.alternativesExpanded
+    });
+  },
+
+  /**
+   * 点击候选物种，切换查看该候选的识别结果
+   * 说明：切换后标签按新物种重新计算；候选列表与提示条状态保持不变
+   */
+  onAlternativeTap(event) {
+    const index = event.currentTarget.dataset.index;
+    const candidate = this.data.alternatives[index];
+    if (!candidate) {
+      return;
+    }
+
+    this.renderSpecies({
+      name: candidate.name,
+      latinName: candidate.latinName,
+      speciesKey: candidate.speciesKey,
+      category: candidate.category,
+      order: candidate.order,
+      family: candidate.family
+    }, {
+      description: candidate.description,
+      habitat: candidate.habitat,
+      location: this.data.discovery.location,
+      discoveredAt: new Date().toISOString()
+    });
+
+    wx.pageScrollTo({ scrollTop: 0, duration: 200 });
+  },
+
+  /**
+   * 点击「重拍」
+   * 说明：返回首页重新拍照
+   */
+  onRetake() {
+    wx.navigateBack();
+  },
+
+  /**
+   * 点击「手动搜索」
+   * 说明：跳转手动搜索页（该页在后续轮次实现）
+   */
+  onManualSearch() {
+    wx.navigateTo({
+      url: '/pages/manual-search/manual-search'
     });
   },
 

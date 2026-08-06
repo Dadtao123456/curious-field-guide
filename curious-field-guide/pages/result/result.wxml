@@ -1,9 +1,37 @@
 <!-- 好奇图鉴 - 识别结果页（手账风格） -->
-<!-- 数据流：onLoad 读取识别结果/发现记录 → 渲染照片对比、物种信息、标签 → 收藏/生成卡片 -->
+<!-- 数据流：onLoad 读取识别结果/发现记录 → 渲染照片对比、物种信息、标签 → 收藏/生成卡片/切换候选 -->
 
-<view class="page-container result-page">
+<!-- 识别失败态 -->
+<view class="page-container result-page result-failed" wx:if="{{isFailed}}">
+  <view class="failed-block">
+    <text class="failed-icon">🔍</text>
+    <text class="failed-title">暂时无法识别</text>
+    <text class="failed-desc">{{failMessage}}</text>
+    <view class="failed-actions">
+      <view class="btn btn-secondary action-btn" bindtap="onRetake">重拍</view>
+      <view class="btn btn-primary action-btn" bindtap="onManualSearch">手动搜索</view>
+    </view>
+  </view>
+</view>
+
+<!-- 正常结果态 -->
+<view class="page-container result-page" wx:else>
+  <!-- 低置信度提示条 -->
+  <view class="notice-bar" wx:if="{{isUncertain && mode === 'identify'}}">
+    <text class="notice-text">识别不确定（置信度 {{confidenceText}}），建议换个角度重拍</text>
+    <view class="notice-actions">
+      <text class="notice-link" bindtap="onRetake">重拍</text>
+      <text class="notice-link" bindtap="onManualSearch">手动搜索</text>
+    </view>
+  </view>
+
+  <!-- 菌类提示条 -->
+  <view class="notice-bar" wx:if="{{isFungi && !isUncertain}}">
+    <text class="notice-text">菌类识别仅供参考，请勿据此判断能否食用</text>
+  </view>
+
   <!-- 照片对比区 -->
-  <view class="photo-compare">
+  <view class="photo-compare {{isUncertain || isFungi ? 'mt-md' : ''}}">
     <view class="photo-box">
       <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img" />
       <view wx:else class="photo-placeholder photo-placeholder-life">
@@ -14,6 +42,7 @@
     <view class="photo-box">
       <view class="photo-placeholder photo-placeholder-id">
         <text class="photo-emoji">{{categoryEmoji}}</text>
+        <text class="photo-pending">标准图整理中</text>
       </view>
       <text class="photo-label">身份证照</text>
     </view>
@@ -24,6 +53,26 @@
     <text class="species-name">{{species.name}}</text>
     <text class="species-latin">{{species.latinName}}</text>
     <rarity-tags tags="{{tags}}" class="species-tags" />
+  </view>
+
+  <!-- 其他可能（Top-3 候选，默认折叠） -->
+  <view class="alternatives mt-lg" wx:if="{{alternatives.length > 0 && mode === 'identify'}}">
+    <view class="alternatives-header" bindtap="onToggleAlternatives">
+      <text class="alternatives-title">其他可能</text>
+      <text class="alternatives-arrow">{{alternativesExpanded ? '▲' : '▼'}}</text>
+    </view>
+    <view class="alternatives-list" wx:if="{{alternativesExpanded}}">
+      <view
+        wx:for="{{alternatives}}"
+        wx:key="speciesKey"
+        class="alternative-item"
+        bindtap="onAlternativeTap"
+        data-index="{{index}}"
+      >
+        <text class="alternative-name">{{item.name}}</text>
+        <text class="alternative-confidence">置信度 {{item.confidence}}</text>
+      </view>
+    </view>
   </view>
 
   <!-- 信息区块 -->

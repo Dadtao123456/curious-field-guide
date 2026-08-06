@@ -184,13 +184,15 @@ Page({
 
   /**
    * 调用 mock 识别并跳转结果页
-   * 说明：识别结果通过本地缓存传递给结果页（数据量大，不适合 URL 参数）
+   * 说明：识别结果通过本地缓存传递给结果页（数据量大，不适合 URL 参数）；
+   *       识别失败同样跳转，由结果页展示失败态与重拍/手动搜索入口
    * @param {String} imagePath - 照片临时路径
+   * @param {Object} options - 透传给识别接口的参数（mock 阶段可带 scenario 测试场景）
    */
-  identifyAndNavigate(imagePath) {
+  identifyAndNavigate(imagePath, options = {}) {
     wx.showLoading({ title: '识别中...', mask: true });
 
-    api.identifyImage(imagePath).then(result => {
+    api.identifyImage(imagePath, options).then(result => {
       wx.hideLoading();
       result.userPhotoUrl = imagePath;
       wx.setStorageSync('identify_result', result);
@@ -200,7 +202,26 @@ Page({
     }).catch(error => {
       wx.hideLoading();
       console.error('[index] 识别失败', error);
-      wx.showToast({ title: '识别失败，请重试', icon: 'none' });
+      wx.showToast({ title: '识别服务暂时开小差了，请稍后再试', icon: 'none' });
+    });
+  },
+
+  /**
+   * 长按拍照区：mock 场景测试入口
+   * 说明：mock 阶段用于自测识别分支（低置信度/菌类/失败），接入真实接口后移除
+   */
+  onCameraEntryLongPress() {
+    if (auth.isBrowseOnly() || !auth.hasAgreedPrivacy()) {
+      this.setData({ showPrivacyModal: true });
+      return;
+    }
+
+    wx.showActionSheet({
+      itemList: ['正常识别', '低置信度（识别不确定）', '菌类（仅供参考）', '识别失败'],
+      success: (res) => {
+        const scenarioMap = ['normal', 'low_confidence', 'fungi', 'fail'];
+        this.identifyAndNavigate('', { scenario: scenarioMap[res.tapIndex] });
+      }
     });
   },
 

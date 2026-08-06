@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-08-05 10:50
+
+- **描述**：完成第 4 轮增量交付：按 PRD 补齐识别结果页边界场景。结果页新增「识别不确定」黄色提示条（低置信度，含重拍/手动搜索入口）、「菌类识别仅供参考」提示条、「其他可能」Top 候选折叠区（点击可切换物种）、官方图占位文案「标准图整理中」、整页识别失败态（重拍/手动搜索）；mock 识别接口支持 fail / low_confidence / fungi 测试场景并返回 2 个候选物种；首页长按拍照区弹出场景测试选择器（mock 阶段调试用，接入真实接口后移除）；识别服务异常文案按 PRD 统一为「识别服务暂时开小差了，请稍后再试」。
+- **模块**：
+  - `curious-field-guide/utils/api.js`（identifyImage mock 分支 + alternatives）
+  - `curious-field-guide/pages/result/result.js`（失败态/提示条/候选切换逻辑）
+  - `curious-field-guide/pages/result/result.wxml`（失败态与提示条 UI）
+  - `curious-field-guide/pages/result/result.wxss`（提示条/候选区/失败态样式）
+  - `curious-field-guide/pages/index/index.js`（失败仍跳结果页、长按场景入口）
+  - `curious-field-guide/pages/index/index.wxml`（拍照区绑定长按）
+- **备注**：
+  - 语法检查全部通过。
+  - 验证方式：编译后长按首页拍照区，选「识别失败」应进入失败页（重拍/手动搜索）；选「低置信度」应在结果页顶部看到黄色提示条；选「菌类」应看到「仅供参考」提示条；正常识别时点「其他可能」可展开候选并点击切换物种。
+  - 多主体识别按 PRD 为 v1.1 规划，v1.0 不做。
+  - 静态审查遗留：超时处理接真实接口时补；storage key 抽常量列入后续。
+
+---
+
 ## 2026-08-05 10:20
 
 - **描述**：修复隐私弹窗死循环问题——`auth.js` 模块顶层缓存的 `getApp()` 在 App 注册前执行为 undefined，导致已同意隐私的用户点拍照仍反复弹窗、无法进入主流程。按方案 B 修复：隐私状态判断改为函数内实时读取；「同意/仅浏览」动作统一封装进 `auth.js`（含静默登录占位），首页与结果页回调改为调用封装；删除 `app.js` 中不再被调用的三个方法。

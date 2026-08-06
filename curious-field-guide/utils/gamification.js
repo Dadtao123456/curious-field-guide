@@ -1,7 +1,7 @@
 // 好奇图鉴 - 游戏化计算工具
 // 说明：计算稀有度标签、徽章进度、连续天数等，逻辑可复用于多个页面和云函数
 
-const { RARITY_TAGS } = require('./constants');
+const { RARITY_TAGS, BADGE_LIST } = require('./constants');
 
 /**
  * 判断是否为首次发现
@@ -99,9 +99,101 @@ function calculateRarityTags(speciesKey, existingKeys, streak, discoveredAt) {
   return tags;
 }
 
+/**
+ * 汇总收藏列表统计
+ * 说明：图鉴页/我的页共用的统计逻辑：总数、分类计数、覆盖类别数、连续天数、夜间发现数、最早发现日期
+ * @param {Array} list - 收藏记录数组
+ * @returns {Object} { totalCount, categoryStats, categoryCount, streak, nightCount, earliest }
+ */
+function summarizeCollections(list) {
+  const items = Array.isArray(list) ? list : [];
+  const categoryStats = {};
+  let nightCount = 0;
+  let earliest = null;
+
+  items.forEach(item => {
+    if (!item || !item.category) {
+      return;
+    }
+    categoryStats[item.category] = (categoryStats[item.category] || 0) + 1;
+
+    if (item.discoveredAt && isNightDiscovery(item.discoveredAt)) {
+      nightCount++;
+    }
+
+    if (item.discoveredAt && (!earliest || new Date(item.discoveredAt) < new Date(earliest))) {
+      earliest = item.discoveredAt;
+    }
+  });
+
+  return {
+    totalCount: items.length,
+    categoryStats,
+    categoryCount: Object.keys(categoryStats).length,
+    streak: calculateStreak(items.map(item => item.discoveredAt).filter(Boolean)),
+    nightCount,
+    earliest
+  };
+}
+
+/**
+ * 计算徽章解锁状态
+ * 说明：v1.0 徽章按真实数据统计判定；v1.2 规划徽章恒为锁定
+ * @param {Object} stats - { totalCount, categoryStats, streak, nightCount }
+ * @returns {Array} 徽章数组，每项含 unlocked / progress / target
+ */
+function evaluateBadges(stats) {
+  const categoryStats = stats.categoryStats || {};
+
+  return BADGE_LIST.map(badge => {
+    // v1.2 规划徽章：仅展示锁定状态
+    if (badge.version !== 'v1.0') {
+      return { ...badge, unlocked: false, progress: 0 };
+    }
+
+    let progress = 0;
+    switch (badge.id) {
+      case 'first_nature':
+        progress = stats.totalCount;
+        break;
+      case 'insect_apprentice':
+        progress = categoryStats.insect || 0;
+        break;
+      case 'plant_walker':
+        progress = categoryStats.plant || 0;
+        break;
+      case 'bird_observer':
+        progress = categoryStats.bird || 0;
+        break;
+      case 'fungi_hunter':
+        progress = categoryStats.fungi || 0;
+        break;
+      case 'persistent':
+        progress = stats.streak || 0;
+        break;
+      case 'night_owl':
+        progress = stats.nightCount || 0;
+        break;
+      case 'naturalist':
+        progress = stats.totalCount;
+        break;
+      default:
+        progress = 0;
+    }
+
+    return {
+      ...badge,
+      progress,
+      unlocked: progress >= badge.target
+    };
+  });
+}
+
 module.exports = {
   isFirstDiscovery,
   isNightDiscovery,
   calculateStreak,
-  calculateRarityTags
+  calculateRarityTags,
+  summarizeCollections,
+  evaluateBadges
 };

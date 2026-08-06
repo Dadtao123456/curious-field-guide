@@ -1,1 +1,196 @@
-@import '/pages/common/placeholder.wxss';
+/* 我的页样式（手账风格） */
+
+/* 用户信息区 */
+.user-block {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border: var(--border-width-lg) solid var(--border-color);
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-3deg);
+  flex-shrink: 0;
+}
+
+.avatar-emoji {
+  font-size: 56rpx;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.user-nickname {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  transform: rotate(-0.5deg);
+  transform-origin: left center;
+}
+
+.user-join {
+  font-size: var(--text-caption);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 三项统计 */
+.stats-row {
+  display: flex;
+  align-items: center;
+  padding: var(--space-md) 0;
+  border-top: 4rpx dashed var(--border-color);
+  border-bottom: 4rpx dashed var(--border-color);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.stat-divider {
+  width: 4rpx;
+  height: 64rpx;
+  border-left: 4rpx dashed #ddd;
+}
+
+.stat-num {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: var(--text-small);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 里程碑徽章 */
+.badge-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.badge-progress {
+  font-size: var(--text-caption);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+.badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.badge-cell {
+  width: calc(25% - 12rpx);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: var(--space-sm) 0;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 10rpx 18rpx 12rpx 16rpx;
+  background: var(--white);
+  box-sizing: border-box;
+  transition: transform var(--transition-fast);
+}
+
+.badge-cell:active {
+  transform: rotate(-1deg);
+}
+
+.badge-locked {
+  border-style: dashed;
+  opacity: 0.35;
+}
+
+.badge-emoji {
+  font-size: 44rpx;
+}
+
+.badge-name {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+.badge-target {
+  font-size: 18rpx;
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 菜单区 */
+.menu-list {
+  border-top: 4rpx dashed var(--border-color);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-sm);
+  border-bottom: 4rpx dashed #ddd;
+}
+
+.menu-item:active {
+  background: var(--cream);
+}
+
+.menu-title {
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.menu-badge {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: var(--gray);
+  font-family: var(--font-hand);
+  border: 3rpx solid var(--gray);
+  border-radius: 10rpx 6rpx 12rpx 8rpx;
+  padding: 2rpx 10rpx;
+}
+
+.menu-arrow {
+  font-size: 36rpx;
+  color: var(--light-gray);
+  font-family: var(--font-hand);
+}
+
+/* 底部 slogan */
+.profile-slogan {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-lg) 0;
+}

@@ -4,6 +4,7 @@
 const api = require('../../utils/api');
 const { CATEGORY_LIST, CATEGORY_EMOJI_MAP } = require('../../utils/constants');
 const { parseRarityTags } = require('../../utils/format');
+const { summarizeCollections } = require('../../utils/gamification');
 
 Page({
   /**
@@ -58,10 +59,8 @@ Page({
    * @param {Array} items
    */
   buildStats(items) {
-    const countMap = {};
-    items.forEach(item => {
-      countMap[item.category] = (countMap[item.category] || 0) + 1;
-    });
+    const summary = summarizeCollections(items);
+    const countMap = summary.categoryStats;
 
     const categoryStats = CATEGORY_LIST.map(cat => ({
       key: cat.key,
@@ -80,8 +79,8 @@ Page({
     ];
 
     this.setData({
-      totalCount: items.length,
-      categoryCount: Object.keys(countMap).length,
+      totalCount: summary.totalCount,
+      categoryCount: summary.categoryCount,
       categoryStats,
       tabs
     });

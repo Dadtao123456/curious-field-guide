@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-08-05 12:40
+
+- **描述**：完成第 6 轮增量交付：实现手账风格「我的」页。包含 emoji 头像（旋转-3°）与昵称、加入天数（按最早发现日期实算）、三项统计（发现物种/覆盖类别/连续天数，虚线分隔）、里程碑徽章网格（8 个 v1.0 徽章按真实数据判定解锁，2 个 v1.2 徽章恒锁定；锁定态为虚线框+35% 透明度，未解锁显示进度）、菜单区（导出观察手册占位/隐私设置/关于弹窗）、底部 slogan。同时把收藏统计逻辑抽为 gamification.summarizeCollections，图鉴页与我的页共用。
+- **模块**：
+  - `curious-field-guide/pages/profile/`（profile.js / wxml / wxss，全新实现）
+  - `curious-field-guide/utils/gamification.js`（新增 summarizeCollections、evaluateBadges）
+  - `curious-field-guide/pages/collection/collection.js`（改用共用统计函数）
+- **备注**：
+  - 语法检查全部通过。
+  - 验证方式：编译后点底部「我的」tab，应看到头像昵称、加入天数、三项统计（与图鉴页数字一致）、里程碑网格（「初识自然」应已解锁显示"已解锁"，其余显示进度如 1/5）；点「隐私设置」跳隐私政策页；点「关于好奇图鉴」弹出版本弹窗。
+  - 静态审查：8 项通过；loading/超时仍为真实接口接入时的统一遗留项。
+
+---
+
 ## 2026-08-05 12:05
 
 - **描述**：修复首页「最近发现」不随收藏变化的问题。根因：首页 getDashboard 返回固定 mock 列表，与图鉴页的合并数据脱节；且首页只在 onLoad 加载，从结果页收藏返回后不刷新。修复：getDashboard 改为基于合并收藏数据实时计算（累计发现数=合并列表长度、连续天数用 gamification.calculateStreak 实算、最近发现=合并列表前 5 条）；首页加载改为 onShow 触发，收藏返回后自动刷新；列表项跳转 key 统一为 viewKey。顺带：收藏时把当次稀有度标签一并存入，新收藏在首页/图鉴页也带蜡笔标签。

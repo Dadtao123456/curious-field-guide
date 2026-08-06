@@ -1,6 +1,53 @@
-<view class="page-container placeholder-page">
-  <text class="placeholder-icon">🔎</text>
-  <text class="text-section-title">手动搜索</text>
-  <text class="text-caption mt-sm">这里将支持输入关键词搜索物种</text>
-  <text class="text-caption">（v1.0 第 5 轮实现）</text>
+<!-- 好奇图鉴 - 手动搜索页（手账风格） -->
+<!-- 数据流：输入关键词 → 搜索 → 候选列表 → 点击进结果页确认 -->
+
+<view class="page-container search-page">
+  <!-- 搜索区 -->
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="物种名称或外观特征"
+      placeholder-class="search-placeholder"
+      value="{{keyword}}"
+      confirm-type="search"
+      bindinput="onKeywordInput"
+      bindconfirm="onSearch"
+    />
+    <view class="btn btn-primary search-btn {{searching ? 'btn-disabled' : ''}}" bindtap="onSearch">
+      {{searching ? '...' : '搜索'}}
+    </view>
+  </view>
+
+  <!-- 初始态 -->
+  <view class="search-hint-block" wx:if="{{!searched}}">
+    <text class="search-hint-icon">🔎</text>
+    <text class="text-hint">试试：白色 大翅膀 / 玉带凤蝶 / 公园常见的鸟</text>
+  </view>
+
+  <!-- 无结果态 -->
+  <view class="search-hint-block" wx:if="{{searched && results.length === 0}}">
+    <text class="search-hint-icon">🍂</text>
+    <text class="text-hint">未找到相关物种，建议尝试更通用的关键词，如颜色 + 形状</text>
+  </view>
+
+  <!-- 候选列表 -->
+  <view class="candidate-list" wx:if="{{results.length > 0}}">
+    <view
+      wx:for="{{results}}"
+      wx:key="speciesKey"
+      class="candidate-item"
+      bindtap="onCandidateTap"
+      data-index="{{index}}"
+    >
+      <view class="candidate-thumb">
+        <text class="candidate-emoji">{{item.emoji}}</text>
+      </view>
+      <view class="candidate-info">
+        <text class="candidate-name">{{item.name}}</text>
+        <text class="candidate-latin">{{item.latinName}}</text>
+        <text class="candidate-desc">{{item.description}}</text>
+      </view>
+      <text class="candidate-arrow">›</text>
+    </view>
+  </view>
 </view>

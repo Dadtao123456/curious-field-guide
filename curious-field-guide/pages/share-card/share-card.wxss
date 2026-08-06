@@ -1,1 +1,136 @@
-@import '/pages/common/placeholder.wxss';
+/* 分享卡片页样式（手账风格） */
+
+.share-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 卡片预览 */
+.share-card {
+  position: relative;
+  width: 600rpx;
+  border: var(--border-width-lg) solid var(--border-color);
+  border-radius: 10rpx 36rpx 18rpx 30rpx;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.share-card::after {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  right: -8rpx;
+  bottom: -8rpx;
+  border: 2rpx solid var(--border-color);
+  border-radius: 14rpx 34rpx 22rpx 28rpx;
+  pointer-events: none;
+  opacity: 0.1;
+}
+
+.card-top {
+  height: 220rpx;
+  background: linear-gradient(135deg, #e8f5e9 0%, #d4edda 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: var(--border-width) solid var(--border-color);
+}
+
+.card-emoji {
+  font-size: 112rpx;
+  transform: rotate(-3deg);
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+}
+
+.card-name {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  transform: rotate(-0.5deg);
+}
+
+.card-latin {
+  font-size: var(--text-body);
+  color: var(--gray);
+  font-style: italic;
+  font-family: var(--font-hand);
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.card-info {
+  font-size: var(--text-caption);
+  color: var(--gray);
+  font-family: var(--font-hand);
+  margin-top: var(--space-sm);
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: var(--space-md) 0;
+  border-top: 4rpx dashed #ddd;
+}
+
+.card-brand {
+  font-size: var(--text-h4);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+.card-slogan {
+  font-size: var(--text-small);
+  color: var(--light-gray);
+  font-family: var(--font-hand);
+}
+
+/* 操作区 */
+.share-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 600rpx;
+}
+
+.action-btn {
+  height: 88rpx;
+  font-size: 30rpx;
+}
+
+/* 分享按钮（button 组件样式重置） */
+.share-btn {
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  background: var(--white);
+}
+
+.share-btn::after {
+  border: none;
+}
+
+/* 离屏 canvas 移出可视区 */
+.offscreen-canvas {
+  position: fixed;
+  left: -2000rpx;
+  top: 0;
+}

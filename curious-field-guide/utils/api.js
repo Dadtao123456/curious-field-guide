@@ -112,10 +112,12 @@ function searchSpecies(keyword) {
   return Promise.resolve(results.map(item => ({
     name: item.name,
     latinName: item.latinName,
+    speciesKey: item.speciesKey,
     category: item.category,
     order: item.order,
     family: item.family,
-    description: item.description
+    description: item.description,
+    habitat: item.habitat
   })));
 }
 

@@ -149,6 +149,16 @@
   text-decoration: underline;
 }
 
+/* 手动搜索来源提示条（冰蓝） */
+.notice-bar-blue {
+  border-color: var(--blue);
+  background-color: var(--blue-bg);
+}
+
+.notice-text-blue {
+  color: var(--blue);
+}
+
 /* 其他可能候选区 */
 .alternatives {
   border: var(--border-width) dashed var(--border-color);

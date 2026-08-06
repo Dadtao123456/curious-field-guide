@@ -39,7 +39,8 @@ const CATEGORY_EMOJI_MAP = CATEGORY_LIST.reduce((map, item) => {
 const STORAGE_KEYS = {
   PRIVACY_STATUS: 'privacy_status',
   IDENTIFY_RESULT: 'identify_result',
-  COLLECTIONS: 'mock_collections'
+  COLLECTIONS: 'mock_collections',
+  SHARE_CARD: 'share_card_data'
 };
 
 /**

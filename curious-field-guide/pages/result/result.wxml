@@ -30,6 +30,11 @@
     <text class="notice-text">菌类识别仅供参考，请勿据此判断能否食用</text>
   </view>
 
+  <!-- 手动搜索来源提示条 -->
+  <view class="notice-bar notice-bar-blue" wx:if="{{isManualSearch && mode === 'identify'}}">
+    <text class="notice-text notice-text-blue">这是手动搜索的结果，非拍照识别，确认后可收入图鉴</text>
+  </view>
+
   <!-- 照片对比区 -->
   <view class="photo-compare {{isUncertain || isFungi ? 'mt-md' : ''}}">
     <view class="photo-box">

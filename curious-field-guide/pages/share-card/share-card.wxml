@@ -1,6 +1,42 @@
-<view class="page-container placeholder-page">
-  <text class="placeholder-icon">🎴</text>
-  <text class="text-section-title">分享卡片</text>
-  <text class="text-caption mt-sm">这里将生成精美的物种发现卡片</text>
-  <text class="text-caption">（v1.0 第 5 轮实现）</text>
+<!-- 好奇图鉴 - 分享卡片页（手账风格） -->
+<!-- 数据流：读取分享数据 → 预览卡片 → canvas 绘制 → 保存相册/分享 -->
+
+<view class="page-container share-page" wx:if="{{card}}">
+  <!-- 卡片预览 -->
+  <view class="share-card">
+    <view class="card-top">
+      <text class="card-emoji">{{card.categoryEmoji}}</text>
+    </view>
+    <view class="card-body">
+      <text class="card-name">{{card.name}}</text>
+      <text class="card-latin">{{card.latinName}}</text>
+      <view class="card-tags" wx:if="{{card.tags.length > 0}}">
+        <view
+          wx:for="{{card.tags}}"
+          wx:key="index"
+          class="mini-tag mini-tag-{{item.color}}"
+        >{{item.label}}</view>
+      </view>
+      <text class="card-info">{{card.location}} · {{card.discoveredAtText}}</text>
+    </view>
+    <view class="card-footer">
+      <text class="card-brand">好奇图鉴</text>
+      <text class="card-slogan">珍惜你的每一次好奇心</text>
+    </view>
+  </view>
+
+  <!-- 操作区 -->
+  <view class="share-actions mt-xl">
+    <view class="btn btn-primary action-btn {{saving ? 'btn-disabled' : ''}}" bindtap="onSaveImage">
+      {{saving ? '保存中...' : '保存图片'}}
+    </view>
+    <button class="btn btn-secondary action-btn share-btn" open-type="share">分享给朋友</button>
+  </view>
+
+  <!-- 离屏 canvas：用于生成保存图片 -->
+  <canvas
+    canvas-id="shareCanvas"
+    class="offscreen-canvas"
+    style="width: 300px; height: 400px;"
+  ></canvas>
 </view>

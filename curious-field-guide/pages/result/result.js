@@ -27,6 +27,8 @@ Page({
     isUncertain: false,
     // 是否为菌类结果（展示「仅供参考」黄条）
     isFungi: false,
+    // 是否为手动搜索来源（无置信度，展示来源提示条）
+    isManualSearch: false,
     // 识别置信度（0~1，用于展示）
     confidenceText: '',
     // 候选池：首选 + 其他候选，切换后当前物种从候选区移除
@@ -125,12 +127,16 @@ Page({
       confidence: result.confidence || 0
     }, ...(result.alternatives || [])];
 
+    // 置信度可能为 null（手动搜索无置信度），此时不展示低置信度黄条
+    const confidence = result.confidence;
+
     this.setData({
       userPhotoUrl: result.userPhotoUrl || '',
       officialPhotoUrl: result.officialPhotoUrl || '',
-      isUncertain: (result.confidence || 0) < LOW_CONFIDENCE_THRESHOLD,
+      isUncertain: confidence != null && confidence < LOW_CONFIDENCE_THRESHOLD,
       isFungi: result.species.category === 'fungi',
-      confidenceText: (result.confidence || 0).toFixed(2),
+      isManualSearch: !!result.isManualSearch,
+      confidenceText: confidence != null ? confidence.toFixed(2) : '',
       candidatePool: pool,
       currentCandidateIndex: 0
     });
@@ -325,13 +331,27 @@ Page({
 
   /**
    * 点击「生成卡片」
-   * 说明：分享卡片页在后续轮次实现，当前占位提示
+   * 说明：把当前物种数据写入缓存，跳转分享卡片页生成可保存/分享的卡片图
    */
   onShareCard() {
-    wx.showToast({
-      title: '分享卡片待实现',
-      icon: 'none'
-    });
+    const shareData = {
+      name: this.data.species.name,
+      latinName: this.data.species.latinName,
+      category: this.data.species.category,
+      categoryLabel: this.data.species.categoryLabel,
+      categoryEmoji: this.data.categoryEmoji,
+      tags: this.data.tags,
+      location: this.data.discovery.location,
+      discoveredAtText: this.data.discovery.discoveredAtText
+    };
+
+    try {
+      wx.setStorageSync(STORAGE_KEYS.SHARE_CARD, shareData);
+      wx.navigateTo({ url: '/pages/share-card/share-card' });
+    } catch (error) {
+      console.error('[result] 写入分享数据失败', error);
+      wx.showToast({ title: '生成失败，请重试', icon: 'none' });
+    }
   },
 
   /**

@@ -34,10 +34,10 @@
     <view class="recent-list">
       <view
         wx:for="{{dashboard.recentDiscoveries}}"
-        wx:key="id"
+        wx:key="viewKey"
         class="recent-item"
         bindtap="onRecentItemTap"
-        data-id="{{item.id}}"
+        data-key="{{item.viewKey}}"
       >
         <view class="recent-thumb">
           <text class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>

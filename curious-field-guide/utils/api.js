@@ -1,20 +1,24 @@
 // 好奇图鉴 - API 请求封装
 // 说明：v1.0 先用 mock 数据返回，后续接入真实云函数时只替换此文件内部实现
 
-const { MOCK_SPECIES_LIST, MOCK_DISCOVERIES, MOCK_USER_STATS } = require('../data/species-mock');
+const { MOCK_SPECIES_LIST, MOCK_DISCOVERIES } = require('../data/species-mock');
 const { STORAGE_KEYS } = require('./constants');
+const { calculateStreak } = require('./gamification');
 
 /**
  * 获取首页仪表盘数据
- * 说明：返回累计发现数、连续天数、最近发现列表
+ * 说明：累计发现数、连续天数、最近发现列表均基于合并后的收藏数据实时计算，
+ *       保证「收入图鉴」后首页同步更新
  * @returns {Promise<Object>} { totalDiscoveries, streakCount, recentDiscoveries }
  */
 function getDashboard() {
-  return Promise.resolve({
-    totalDiscoveries: MOCK_USER_STATS.totalDiscoveries,
-    streakCount: MOCK_USER_STATS.streakCount,
-    recentDiscoveries: MOCK_DISCOVERIES.slice(0, 5)
-  });
+  return getCollections().then(list => ({
+    totalDiscoveries: list.length,
+    streakCount: calculateStreak(
+      list.map(item => item.discoveredAt).filter(Boolean)
+    ),
+    recentDiscoveries: list.slice(0, 5)
+  }));
 }
 
 /**
@@ -201,7 +205,7 @@ function getCollections() {
     userPhotoUrl: item.userPhotoUrl || '',
     location: item.location || '未知地点',
     discoveredAt: item.collectedAt,
-    rarityTags: []
+    rarityTags: item.rarityTags || []
   }));
 
   // 本地收藏在前，历史发现在后；按 speciesKey 去重

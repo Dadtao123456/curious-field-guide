@@ -31,6 +31,13 @@ Page({
   onLoad() {
     this.initCategoryEmojiMap();
     this.checkPrivacyStatus();
+  },
+
+  /**
+   * 页面显示时刷新数据
+   * 说明：从结果页「收入图鉴」返回后，最近发现与统计需同步更新
+   */
+  onShow() {
     this.loadDashboard();
   },
 
@@ -262,12 +269,12 @@ Page({
 
   /**
    * 点击最近发现项
-   * 说明：跳转结果页只读模式，展示该次发现的详细信息
+   * 说明：跳转结果页只读模式，key 兼容发现记录 id 与物种 speciesKey
    */
   onRecentItemTap(event) {
-    const id = event.currentTarget.dataset.id;
+    const key = event.currentTarget.dataset.key;
     wx.navigateTo({
-      url: `/pages/result/result?mode=readonly&id=${id}`
+      url: `/pages/result/result?mode=readonly&id=${key}`
     });
   },
 

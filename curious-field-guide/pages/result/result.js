@@ -354,7 +354,8 @@ Page({
       speciesKey: this.data.species.speciesKey,
       category: this.data.species.category,
       location: this.data.discovery.location,
-      userPhotoUrl: this.data.userPhotoUrl
+      userPhotoUrl: this.data.userPhotoUrl,
+      rarityTags: this.data.tags.map(tag => tag.label)
     }).then(res => {
       if (res.success) {
         this.setData({ isCollected: true });

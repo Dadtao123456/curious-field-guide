@@ -33,14 +33,15 @@
   <!-- 照片对比区 -->
   <view class="photo-compare {{isUncertain || isFungi ? 'mt-md' : ''}}">
     <view class="photo-box">
-      <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img" />
+      <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img" bindtap="onPhotoTap" data-type="user" />
       <view wx:else class="photo-placeholder photo-placeholder-life">
         <text class="photo-emoji">📷</text>
       </view>
       <text class="photo-label">生活照</text>
     </view>
     <view class="photo-box">
-      <view class="photo-placeholder photo-placeholder-id">
+      <image wx:if="{{officialPhotoUrl}}" src="{{officialPhotoUrl}}" mode="aspectFill" class="photo-img" bindtap="onPhotoTap" data-type="official" />
+      <view wx:else class="photo-placeholder photo-placeholder-id" bindtap="onPhotoTap" data-type="official">
         <text class="photo-emoji">{{categoryEmoji}}</text>
         <text class="photo-pending">标准图整理中</text>
       </view>
@@ -56,18 +57,18 @@
   </view>
 
   <!-- 其他可能（Top-3 候选，默认折叠） -->
-  <view class="alternatives mt-lg" wx:if="{{alternatives.length > 0 && mode === 'identify'}}">
+  <view class="alternatives mt-lg" wx:if="{{displayAlternatives.length > 0 && mode === 'identify'}}">
     <view class="alternatives-header" bindtap="onToggleAlternatives">
       <text class="alternatives-title">其他可能</text>
       <text class="alternatives-arrow">{{alternativesExpanded ? '▲' : '▼'}}</text>
     </view>
     <view class="alternatives-list" wx:if="{{alternativesExpanded}}">
       <view
-        wx:for="{{alternatives}}"
+        wx:for="{{displayAlternatives}}"
         wx:key="speciesKey"
         class="alternative-item"
         bindtap="onAlternativeTap"
-        data-index="{{index}}"
+        data-pool-index="{{item.poolIndex}}"
       >
         <text class="alternative-name">{{item.name}}</text>
         <text class="alternative-confidence">置信度 {{item.confidence}}</text>

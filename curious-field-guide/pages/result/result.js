@@ -29,9 +29,15 @@ Page({
     isFungi: false,
     // 识别置信度（0~1，用于展示）
     confidenceText: '',
-    // 「其他可能」候选列表与展开状态
-    alternatives: [],
+    // 候选池：首选 + 其他候选，切换后当前物种从候选区移除
+    candidatePool: [],
+    currentCandidateIndex: 0,
+    // 候选区展示列表（候选池中除当前物种外的项，带 poolIndex）
+    displayAlternatives: [],
+    // 「其他可能」展开状态
     alternativesExpanded: false,
+    // 官方标准图 URL（mock 阶段为空，显示占位）
+    officialPhotoUrl: '',
     // 当前物种是否已收入图鉴
     isCollected: false,
     // 是否显示隐私政策弹窗
@@ -106,13 +112,29 @@ Page({
       return;
     }
 
+    // 构建候选池：首选物种 + 其他候选，支持轮换切换
+    const pool = [{
+      name: result.species.name,
+      latinName: result.species.latinName,
+      speciesKey: result.species.speciesKey,
+      category: result.species.category,
+      order: result.species.order,
+      family: result.species.family,
+      description: result.description,
+      habitat: result.habitat,
+      confidence: result.confidence || 0
+    }, ...(result.alternatives || [])];
+
     this.setData({
       userPhotoUrl: result.userPhotoUrl || '',
+      officialPhotoUrl: result.officialPhotoUrl || '',
       isUncertain: (result.confidence || 0) < LOW_CONFIDENCE_THRESHOLD,
       isFungi: result.species.category === 'fungi',
       confidenceText: (result.confidence || 0).toFixed(2),
-      alternatives: result.alternatives || []
+      candidatePool: pool,
+      currentCandidateIndex: 0
     });
+    this.refreshAlternatives();
 
     this.renderSpecies(result.species, {
       description: result.description,
@@ -214,15 +236,36 @@ Page({
   },
 
   /**
+   * 刷新候选区展示列表
+   * 说明：候选池中除当前展示物种外的项，附带 poolIndex 供切换定位
+   */
+  refreshAlternatives() {
+    const { candidatePool, currentCandidateIndex } = this.data;
+    const displayAlternatives = candidatePool
+      .map((item, poolIndex) => ({ ...item, poolIndex }))
+      .filter(item => item.poolIndex !== currentCandidateIndex);
+    this.setData({ displayAlternatives });
+  },
+
+  /**
    * 点击候选物种，切换查看该候选的识别结果
-   * 说明：切换后标签按新物种重新计算；候选列表与提示条状态保持不变
+   * 说明：切换为轮换制——当前物种回到候选区，被点候选成为当前展示；
+   *       标签按新物种重新计算，黄条状态按当前候选置信度更新
    */
   onAlternativeTap(event) {
-    const index = event.currentTarget.dataset.index;
-    const candidate = this.data.alternatives[index];
+    const poolIndex = event.currentTarget.dataset.poolIndex;
+    const candidate = this.data.candidatePool[poolIndex];
     if (!candidate) {
       return;
     }
+
+    this.setData({
+      currentCandidateIndex: poolIndex,
+      isFungi: candidate.category === 'fungi',
+      isUncertain: (candidate.confidence || 0) < LOW_CONFIDENCE_THRESHOLD,
+      confidenceText: (candidate.confidence || 0).toFixed(2)
+    });
+    this.refreshAlternatives();
 
     this.renderSpecies({
       name: candidate.name,
@@ -239,6 +282,27 @@ Page({
     });
 
     wx.pageScrollTo({ scrollTop: 0, duration: 200 });
+  },
+
+  /**
+   * 点击照片查看大图
+   * 说明：生活照/官方图有 URL 时调起微信图片预览；官方图占位时提示整理中
+   */
+  onPhotoTap(event) {
+    const type = event.currentTarget.dataset.type;
+    const url = type === 'official' ? this.data.officialPhotoUrl : this.data.userPhotoUrl;
+
+    if (!url) {
+      if (type === 'official') {
+        wx.showToast({ title: '标准图整理中', icon: 'none' });
+      }
+      return;
+    }
+
+    wx.previewImage({
+      urls: [url],
+      current: url
+    });
   },
 
   /**

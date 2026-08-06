@@ -66,12 +66,12 @@ Page({
 
   /**
    * 点击徽章，弹出详情卡片
-   * 说明：网格中未解锁徽章以问号保密，点击后揭晓名称、达成条件与进度
+   * 说明：仅已解锁徽章可点开查看成就内容；未解锁徽章保持问号保密，点击不响应
    */
   onBadgeTap(event) {
     const index = event.currentTarget.dataset.index;
     const badge = this.data.badges[index];
-    if (!badge) {
+    if (!badge || !badge.unlocked) {
       return;
     }
     this.setData({

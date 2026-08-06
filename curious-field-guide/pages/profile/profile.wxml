@@ -88,9 +88,7 @@
     <text class="badge-modal-emoji">{{activeBadge.emoji}}</text>
     <text class="badge-modal-name">{{activeBadge.name}}</text>
     <text class="badge-modal-desc">{{activeBadge.description}}</text>
-    <text class="badge-modal-status" wx:if="{{activeBadge.unlocked}}">🎉 已解锁</text>
-    <text class="badge-modal-status" wx:elif="{{activeBadge.version !== 'v1.0'}}">后续版本开放</text>
-    <text class="badge-modal-status" wx:else>进度 {{activeBadge.progress}} / {{activeBadge.target}}，继续探索吧</text>
+    <text class="badge-modal-status">🎉 已解锁</text>
     <view class="btn btn-secondary badge-modal-btn" bindtap="onCloseBadgeModal">知道了</view>
   </view>
 </view>

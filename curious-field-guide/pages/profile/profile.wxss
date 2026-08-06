@@ -142,6 +142,88 @@
   font-family: var(--font-hand);
 }
 
+.badge-question {
+  font-weight: 700;
+  color: var(--gray);
+}
+
+/* 徽章详情卡片 */
+.badge-modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(58, 58, 58, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.badge-modal {
+  position: relative;
+  width: 520rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) var(--space-lg);
+  background-color: var(--white);
+  border: var(--border-width-lg) solid var(--border-color);
+  border-radius: 10rpx 36rpx 18rpx 30rpx;
+  box-sizing: border-box;
+}
+
+.badge-modal::after {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  right: -8rpx;
+  bottom: -8rpx;
+  border: 2rpx solid var(--border-color);
+  border-radius: 14rpx 34rpx 22rpx 28rpx;
+  pointer-events: none;
+  opacity: 0.1;
+}
+
+.badge-modal-emoji {
+  font-size: 96rpx;
+  transform: rotate(-3deg);
+}
+
+.badge-modal-name {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  transform: rotate(-0.5deg);
+}
+
+.badge-modal-desc {
+  font-size: var(--text-body);
+  color: var(--gray);
+  font-family: var(--font-hand);
+  text-align: center;
+  line-height: 44rpx;
+}
+
+.badge-modal-status {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  color: var(--orange);
+  font-family: var(--font-hand);
+  margin-top: var(--space-xs);
+}
+
+.badge-modal-btn {
+  width: 100%;
+  height: 80rpx;
+  font-size: 28rpx;
+  margin-top: var(--space-md);
+}
+
 /* 菜单区 */
 .menu-list {
   border-top: 4rpx dashed var(--border-color);

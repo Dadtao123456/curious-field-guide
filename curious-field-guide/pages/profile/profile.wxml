@@ -43,9 +43,11 @@
         wx:for="{{badges}}"
         wx:key="id"
         class="badge-cell {{item.unlocked ? '' : 'badge-locked'}}"
+        bindtap="onBadgeTap"
+        data-index="{{index}}"
       >
-        <text class="badge-emoji">{{item.emoji}}</text>
-        <text class="badge-name">{{item.name}}</text>
+        <text class="badge-emoji {{item.unlocked ? '' : 'badge-question'}}">{{item.unlocked ? item.emoji : '?'}}</text>
+        <text class="badge-name">{{item.unlocked ? item.name : '???'}}</text>
         <text class="badge-target">{{item.unlocked ? '已解锁' : item.progress + '/' + item.target}}</text>
       </view>
     </view>
@@ -77,5 +79,18 @@
   <!-- 底部 slogan -->
   <view class="profile-slogan mt-xl">
     <text class="text-hint">珍惜你的每一次好奇心</text>
+  </view>
+</view>
+
+<!-- 徽章详情卡片 -->
+<view class="badge-modal-mask" wx:if="{{showBadgeModal}}" bindtap="onCloseBadgeModal">
+  <view class="badge-modal" catchtap="onModalContentTap">
+    <text class="badge-modal-emoji">{{activeBadge.emoji}}</text>
+    <text class="badge-modal-name">{{activeBadge.name}}</text>
+    <text class="badge-modal-desc">{{activeBadge.description}}</text>
+    <text class="badge-modal-status" wx:if="{{activeBadge.unlocked}}">🎉 已解锁</text>
+    <text class="badge-modal-status" wx:elif="{{activeBadge.version !== 'v1.0'}}">后续版本开放</text>
+    <text class="badge-modal-status" wx:else>进度 {{activeBadge.progress}} / {{activeBadge.target}}，继续探索吧</text>
+    <view class="btn btn-secondary badge-modal-btn" bindtap="onCloseBadgeModal">知道了</view>
   </view>
 </view>

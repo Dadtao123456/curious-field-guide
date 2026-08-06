@@ -21,7 +21,11 @@ Page({
     // 徽章列表（含解锁状态）
     badges: [],
     // 已解锁徽章数
-    unlockedCount: 0
+    unlockedCount: 0,
+    // 当前查看详情的徽章
+    activeBadge: null,
+    // 是否显示徽章详情卡片
+    showBadgeModal: false
   },
 
   /**
@@ -58,6 +62,36 @@ Page({
       console.error('[profile] 加载失败', error);
       wx.showToast({ title: '加载失败，请重试', icon: 'none' });
     });
+  },
+
+  /**
+   * 点击徽章，弹出详情卡片
+   * 说明：网格中未解锁徽章以问号保密，点击后揭晓名称、达成条件与进度
+   */
+  onBadgeTap(event) {
+    const index = event.currentTarget.dataset.index;
+    const badge = this.data.badges[index];
+    if (!badge) {
+      return;
+    }
+    this.setData({
+      activeBadge: badge,
+      showBadgeModal: true
+    });
+  },
+
+  /**
+   * 关闭徽章详情卡片
+   */
+  onCloseBadgeModal() {
+    this.setData({ showBadgeModal: false });
+  },
+
+  /**
+   * 阻止点击卡片内容时冒泡到遮罩
+   */
+  onModalContentTap() {
+    // 仅阻止冒泡，不执行操作
   },
 
   /**

@@ -2,6 +2,7 @@
 // 说明：v1.0 先用 mock 数据返回，后续接入真实云函数时只替换此文件内部实现
 
 const { MOCK_SPECIES_LIST, MOCK_DISCOVERIES, MOCK_USER_STATS } = require('../data/species-mock');
+const { STORAGE_KEYS } = require('./constants');
 
 /**
  * 获取首页仪表盘数据
@@ -115,21 +116,46 @@ function searchSpecies(keyword) {
 }
 
 /**
- * 按 id 获取单条发现记录（只读模式）
- * 说明：合并物种百科字段，供结果页/详情页展示
- * @param {String} id - 发现记录 id
+ * 按 key 获取单条发现/收藏记录（只读模式）
+ * 说明：key 兼容发现记录 id 与物种 speciesKey；合并物种百科字段，供结果页/详情页展示
+ * @param {String} key - 发现记录 id 或物种 speciesKey
  * @returns {Promise<Object>} 发现记录 + 物种信息
  */
-function getDiscoveryById(id) {
-  const discovery = MOCK_DISCOVERIES.find(item => item.id === id);
-  if (!discovery) {
+function getDiscoveryById(key) {
+  let record = MOCK_DISCOVERIES.find(item => item.id === key);
+
+  if (!record) {
+    // 收藏列表按 speciesKey 查找，转换为发现记录格式
+    let collections = [];
+    try {
+      collections = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
+    } catch (error) {
+      collections = [];
+    }
+    const collected = collections.find(item => item.speciesKey === key);
+    if (collected) {
+      record = {
+        id: collected.speciesKey,
+        speciesName: collected.speciesName,
+        latinName: collected.latinName,
+        speciesKey: collected.speciesKey,
+        category: collected.category,
+        userPhotoUrl: collected.userPhotoUrl || '',
+        location: collected.location || '未知地点',
+        discoveredAt: collected.collectedAt,
+        rarityTags: []
+      };
+    }
+  }
+
+  if (!record) {
     return Promise.reject(new Error('发现记录不存在'));
   }
 
-  const species = MOCK_SPECIES_LIST.find(item => item.speciesKey === discovery.speciesKey) || {};
+  const species = MOCK_SPECIES_LIST.find(item => item.speciesKey === record.speciesKey) || {};
 
   return Promise.resolve({
-    ...discovery,
+    ...record,
     description: species.description || '',
     habitat: species.habitat || '',
     order: species.order || '',
@@ -140,16 +166,56 @@ function getDiscoveryById(id) {
 
 /**
  * 获取已收藏列表（mock）
- * 说明：v1.0 存本地缓存，接入云开发后改为查询数据库
- * @returns {Promise<Array>} 收藏记录数组
+ * 说明：v1.0 合并「历史发现 mock」与「本地收藏缓存」，按 speciesKey 去重；
+ *       接入云开发后改为查询数据库
+ * @returns {Promise<Array>} 收藏记录数组，每项含 viewKey 供详情跳转
  */
 function getCollections() {
+  let stored = [];
   try {
-    return Promise.resolve(wx.getStorageSync('mock_collections') || []);
+    stored = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
   } catch (error) {
     console.error('[api] 读取收藏列表失败', error);
-    return Promise.resolve([]);
   }
+
+  // 历史发现 mock 转换为统一收藏格式
+  const historical = MOCK_DISCOVERIES.map(item => ({
+    viewKey: item.id,
+    speciesName: item.speciesName,
+    latinName: item.latinName,
+    speciesKey: item.speciesKey,
+    category: item.category,
+    userPhotoUrl: item.userPhotoUrl || '',
+    location: item.location,
+    discoveredAt: item.discoveredAt,
+    rarityTags: item.rarityTags || []
+  }));
+
+  // 本地收藏（结果页「收入图鉴」写入）转换为统一格式
+  const collected = stored.map(item => ({
+    viewKey: item.speciesKey,
+    speciesName: item.speciesName,
+    latinName: item.latinName,
+    speciesKey: item.speciesKey,
+    category: item.category,
+    userPhotoUrl: item.userPhotoUrl || '',
+    location: item.location || '未知地点',
+    discoveredAt: item.collectedAt,
+    rarityTags: []
+  }));
+
+  // 本地收藏在前，历史发现在后；按 speciesKey 去重
+  const merged = [...collected, ...historical];
+  const seen = new Set();
+  const list = merged.filter(item => {
+    if (seen.has(item.speciesKey)) {
+      return false;
+    }
+    seen.add(item.speciesKey);
+    return true;
+  });
+
+  return Promise.resolve(list);
 }
 
 /**
@@ -160,14 +226,14 @@ function getCollections() {
  */
 function addCollection(record) {
   try {
-    const list = wx.getStorageSync('mock_collections') || [];
+    const list = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
     const duplicated = list.some(item => item.speciesKey === record.speciesKey);
     if (!duplicated) {
       list.unshift({
         ...record,
         collectedAt: new Date().toISOString()
       });
-      wx.setStorageSync('mock_collections', list);
+      wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, list);
     }
     return Promise.resolve({ success: true, duplicated });
   } catch (error) {

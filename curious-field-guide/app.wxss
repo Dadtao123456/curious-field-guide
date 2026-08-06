@@ -239,7 +239,55 @@ page {
   transform: rotate(1deg);
 }
 
-/* 7. 通用间距工具类 */
+/* 7. 迷你标签（列表项/网格卡片内） */
+.mini-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx 12rpx;
+  border: 3rpx solid;
+  border-radius: 20rpx 8rpx 16rpx 12rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  font-family: var(--font-hand);
+  line-height: 2.0;
+}
+
+.mini-tag-green {
+  border-color: var(--green);
+  background-color: var(--green-bg);
+  color: var(--green);
+  transform: rotate(1deg);
+}
+
+.mini-tag-orange {
+  border-color: var(--orange);
+  background-color: var(--orange-bg);
+  color: var(--orange);
+  transform: rotate(-1deg);
+}
+
+.mini-tag-purple {
+  border-color: var(--purple);
+  background-color: var(--purple-bg);
+  color: var(--purple);
+  transform: rotate(0.5deg);
+}
+
+.mini-tag-blue {
+  border-color: var(--blue);
+  background-color: var(--blue-bg);
+  color: var(--blue);
+  transform: rotate(-0.5deg);
+}
+
+.mini-tag-red {
+  border-color: var(--red);
+  background-color: var(--red-bg);
+  color: var(--red);
+  transform: rotate(1deg);
+}
+
+/* 8. 通用间距工具类 */
 .mt-sm { margin-top: var(--space-sm); }
 .mt-md { margin-top: var(--space-md); }
 .mt-lg { margin-top: var(--space-lg); }

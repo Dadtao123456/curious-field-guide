@@ -1,6 +1,69 @@
-<view class="page-container placeholder-page">
-  <text class="placeholder-icon">📚</text>
-  <text class="text-section-title">我的图鉴</text>
-  <text class="text-caption mt-sm">这里将展示你收集的所有物种</text>
-  <text class="text-caption">（v1.0 第 3 轮实现）</text>
+<!-- 好奇图鉴 - 图鉴页（手账风格） -->
+<!-- 数据流：onShow 加载收藏列表 → 统计/筛选渲染 → 点击卡片跳结果页只读模式 -->
+
+<view class="page-container collection-page">
+  <!-- 标题区 -->
+  <view class="collection-header">
+    <text class="collection-title">我的图鉴</text>
+    <text class="collection-subtitle">{{totalCount}} 个物种 · {{categoryCount}} 个类别</text>
+  </view>
+
+  <!-- 收集进度仪表盘 -->
+  <view class="dashboard mt-lg" wx:if="{{totalCount > 0}}">
+    <view
+      wx:for="{{categoryStats}}"
+      wx:key="key"
+      class="dash-item dash-rotate-{{index}}"
+    >
+      <text class="dash-emoji">{{item.emoji}}</text>
+      <text class="dash-count">{{item.count}}</text>
+      <text class="dash-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- 分类筛选 tabs -->
+  <scroll-view scroll-x class="tabs-scroll mt-lg" wx:if="{{totalCount > 0}}">
+    <view class="tabs-row">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="cat-tab {{activeCategory === item.key ? 'cat-tab-active' : ''}}"
+        bindtap="onCategoryTap"
+        data-key="{{item.key}}"
+      >{{item.label}} {{item.count}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 网格卡片 -->
+  <view class="collection-grid mt-lg" wx:if="{{displayList.length > 0}}">
+    <view
+      wx:for="{{displayList}}"
+      wx:key="viewKey"
+      class="grid-card"
+      bindtap="onItemTap"
+      data-key="{{item.viewKey}}"
+    >
+      <view class="grid-img">
+        <image wx:if="{{item.userPhotoUrl}}" src="{{item.userPhotoUrl}}" mode="aspectFill" class="grid-photo" />
+        <text wx:else class="grid-emoji">{{item.emoji}}</text>
+      </view>
+      <view class="grid-info">
+        <view class="grid-tags" wx:if="{{item.tags.length > 0}}">
+          <view
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+            class="mini-tag mini-tag-{{tag.color}}"
+          >{{tag.label}}</view>
+        </view>
+        <text class="grid-name">{{item.speciesName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空态 -->
+  <view class="empty-state" wx:if="{{totalCount === 0}}">
+    <text class="empty-icon">📚</text>
+    <text class="text-hint">图鉴还是空的，去拍第一张吧</text>
+  </view>
 </view>

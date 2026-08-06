@@ -2,6 +2,8 @@
 // 说明：封装隐私授权状态、静默登录、权限请求等操作
 // 注意：不要在模块顶层调用 getApp()，App 注册完成前会返回 undefined
 
+const { STORAGE_KEYS } = require('./constants');
+
 /**
  * 读取全局隐私状态
  * @returns {String} 'unknown' | 'agreed' | 'browse-only'
@@ -48,7 +50,7 @@ function agreePrivacy() {
     app.globalData.privacyStatus = 'agreed';
   }
   try {
-    wx.setStorageSync('privacy_status', 'agreed');
+    wx.setStorageSync(STORAGE_KEYS.PRIVACY_STATUS, 'agreed');
   } catch (error) {
     console.error('[auth] 写入隐私状态失败', error);
   }
@@ -65,7 +67,7 @@ function chooseBrowseOnly() {
     app.globalData.privacyStatus = 'browse-only';
   }
   try {
-    wx.setStorageSync('privacy_status', 'browse-only');
+    wx.setStorageSync(STORAGE_KEYS.PRIVACY_STATUS, 'browse-only');
   } catch (error) {
     console.error('[auth] 写入隐私状态失败', error);
   }

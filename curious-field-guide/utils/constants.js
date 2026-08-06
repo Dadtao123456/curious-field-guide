@@ -25,6 +25,24 @@ const CATEGORY_LIST = [
 ];
 
 /**
+ * 分类 emoji 映射（由 CATEGORY_LIST 生成，供页面直接渲染）
+ */
+const CATEGORY_EMOJI_MAP = CATEGORY_LIST.reduce((map, item) => {
+  map[item.key] = item.emoji;
+  return map;
+}, {});
+
+/**
+ * 本地缓存 key 汇总
+ * 说明：统一管理 storage key，避免散落各处写死
+ */
+const STORAGE_KEYS = {
+  PRIVACY_STATUS: 'privacy_status',
+  IDENTIFY_RESULT: 'identify_result',
+  COLLECTIONS: 'mock_collections'
+};
+
+/**
  * 稀有度标签定义
  * 说明：PRD v1.0 支持的三种标签，按优先级排序
  */
@@ -161,6 +179,8 @@ const COLORS = {
 module.exports = {
   CATEGORIES,
   CATEGORY_LIST,
+  CATEGORY_EMOJI_MAP,
+  STORAGE_KEYS,
   RARITY_TAGS,
   BADGES,
   BADGE_LIST,

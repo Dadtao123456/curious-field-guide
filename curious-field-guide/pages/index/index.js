@@ -3,7 +3,7 @@
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
-const { CATEGORIES, CATEGORY_LIST } = require('../../utils/constants');
+const { CATEGORIES, CATEGORY_EMOJI_MAP, STORAGE_KEYS } = require('../../utils/constants');
 const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
 
 Page({
@@ -36,14 +36,10 @@ Page({
 
   /**
    * 初始化分类 emoji 映射
-   * 说明：将分类数组转换为 { insect: '🦋', plant: '🌿' } 格式，方便 wxml 使用
+   * 说明：直接使用 constants 生成的映射，供 wxml 列表渲染
    */
   initCategoryEmojiMap() {
-    const map = {};
-    CATEGORY_LIST.forEach(item => {
-      map[item.key] = item.emoji;
-    });
-    this.setData({ categoryEmojiMap: map });
+    this.setData({ categoryEmojiMap: CATEGORY_EMOJI_MAP });
   },
 
   /**
@@ -195,7 +191,7 @@ Page({
     api.identifyImage(imagePath, options).then(result => {
       wx.hideLoading();
       result.userPhotoUrl = imagePath;
-      wx.setStorageSync('identify_result', result);
+      wx.setStorageSync(STORAGE_KEYS.IDENTIFY_RESULT, result);
       wx.navigateTo({
         url: '/pages/result/result?mode=identify'
       });

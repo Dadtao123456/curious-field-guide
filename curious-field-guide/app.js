@@ -2,6 +2,7 @@
 // 负责：全局状态管理、隐私授权状态、静默登录占位、首次启动引导
 
 const auth = require('./utils/auth');
+const { STORAGE_KEYS } = require('./utils/constants');
 
 App({
   /**
@@ -32,7 +33,7 @@ App({
    */
   loadPrivacyStatusFromStorage() {
     try {
-      const status = wx.getStorageSync('privacy_status');
+      const status = wx.getStorageSync(STORAGE_KEYS.PRIVACY_STATUS);
       if (status) {
         this.globalData.privacyStatus = status;
       }

@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-08-05 11:20
+
+- **描述**：完成第 5 轮增量交付：实现手账风格图鉴页。包含「我的图鉴」标题与统计（N 个物种 · M 个类别）、五分类收集进度仪表盘（每个小方块微旋转）、横向滑动分类筛选 tabs（全部+五类带数量）、两列网格卡片（缩略图/蜡笔标签/物种名）、空态兜底；点击卡片跳转结果页只读模式。api 层 getCollections 合并「历史发现 mock + 本地收藏缓存」并按 speciesKey 去重，getDiscoveryById 支持按发现 id 或 speciesKey 查询。顺带清偿静态审查欠账：storage key 抽为 STORAGE_KEYS 常量、分类 emoji 映射抽为 CATEGORY_EMOJI_MAP 常量、mini-tag 样式移至 app.wxss 全局。
+- **模块**：
+  - `curious-field-guide/pages/collection/`（collection.js / wxml / wxss，全新实现）
+  - `curious-field-guide/utils/api.js`（getCollections 合并去重、getDiscoveryById 扩展）
+  - `curious-field-guide/utils/constants.js`（新增 STORAGE_KEYS、CATEGORY_EMOJI_MAP）
+  - `curious-field-guide/app.wxss`（mini-tag 样式全局化）
+  - `curious-field-guide/pages/index/index.js`、`pages/result/result.js`、`app.js`、`utils/auth.js`（改用常量）
+- **备注**：
+  - 语法检查全部通过。
+  - 验证方式：编译后点底部「图鉴」tab，应看到标题统计、五分类进度方块、筛选 tabs、网格卡片；点「昆虫」tab 只剩昆虫卡片；点任意卡片进入结果页只读模式；从首页拍照识别一个新物种并「收入图鉴」后回到图鉴页，新物种应出现在网格最前。
+  - 静态审查遗留：接口 loading/超时处理，接真实接口时统一补。
+
+---
+
 ## 2026-08-05 10:50
 
 - **描述**：完成第 4 轮增量交付：按 PRD 补齐识别结果页边界场景。结果页新增「识别不确定」黄色提示条（低置信度，含重拍/手动搜索入口）、「菌类识别仅供参考」提示条、「其他可能」Top 候选折叠区（点击可切换物种）、官方图占位文案「标准图整理中」、整页识别失败态（重拍/手动搜索）；mock 识别接口支持 fail / low_confidence / fungi 测试场景并返回 2 个候选物种；首页长按拍照区弹出场景测试选择器（mock 阶段调试用，接入真实接口后移除）；识别服务异常文案按 PRD 统一为「识别服务暂时开小差了，请稍后再试」。

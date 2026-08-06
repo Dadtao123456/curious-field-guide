@@ -3,7 +3,7 @@
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
-const { CATEGORIES } = require('../../utils/constants');
+const { CATEGORIES, STORAGE_KEYS } = require('../../utils/constants');
 const { calculateRarityTags } = require('../../utils/gamification');
 const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
 
@@ -86,7 +86,7 @@ Page({
   loadIdentifyResult() {
     let result;
     try {
-      result = wx.getStorageSync('identify_result');
+      result = wx.getStorageSync(STORAGE_KEYS.IDENTIFY_RESULT);
     } catch (error) {
       result = null;
     }

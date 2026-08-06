@@ -198,6 +198,8 @@ Page({
 
       this.setData({
         tags,
+        // 已在图鉴中的物种，按钮直接呈现已收藏状态
+        isCollected: existingKeys.includes(species.speciesKey),
         discovery: {
           location: extra.location || '未知地点',
           discoveredAtText: formatDiscoveryTime(extra.discoveredAt)

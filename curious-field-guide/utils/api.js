@@ -226,14 +226,17 @@ function getCollections() {
 
 /**
  * 收入图鉴（mock）
- * 说明：把识别结果追加到本地收藏列表，重复收藏同一物种会被忽略
+ * 说明：把识别结果追加到本地收藏列表；已收藏过或历史发现中已存在（本就在图鉴中）的物种不重复写入
  * @param {Object} record - 收藏记录（含 speciesKey）
  * @returns {Promise<Object>} { success, duplicated }
  */
 function addCollection(record) {
   try {
     const list = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
-    const duplicated = list.some(item => item.speciesKey === record.speciesKey);
+    const inStored = list.some(item => item.speciesKey === record.speciesKey);
+    const inHistorical = MOCK_DISCOVERIES.some(item => item.speciesKey === record.speciesKey);
+    const duplicated = inStored || inHistorical;
+
     if (!duplicated) {
       list.unshift({
         ...record,

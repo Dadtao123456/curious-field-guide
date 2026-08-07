@@ -33,6 +33,10 @@ const FUNGI_KEYWORDS = ['菇', '菌', '蘑', '木耳', '灵芝', '银耳', '猴�
 // access_token 缓存（有效期约 30 天，提前 1 天刷新）；云函数实例复用时生效
 let cachedToken = null;
 
+// 网络瞬断类错误码：出现这些错误时自动重试，避免偶发连接重置导致整体失败
+const NETWORK_RETRY_TOKENS = ['ECONNRESET', 'ETIMEDOUT', 'ESOCKETTIMEDOUT', 'EPIPE', 'socket hang up', '超时'];
+const MAX_NETWORK_RETRY = 2;
+
 /**
  * 发起 HTTPS 请求的 Promise 封装
  * @param {Object} options - https.request 参数
@@ -64,6 +68,38 @@ function httpsRequest(options, postData) {
 }
 
 /**
+ * 延迟指定毫秒数（用于重试间隔）
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * 带网络重试的 HTTPS 请求
+ * 说明：ECONNRESET 等瞬断错误自动重试（间隔 500ms），非网络错误直接抛出
+ * @param {Object} options - https.request 参数
+ * @param {String} postData - POST 请求体
+ * @param {String} tag - 日志标记（标识是哪一步的请求）
+ * @returns {Promise<Object>} 解析后的 JSON 响应
+ */
+async function httpsRequestWithRetry(options, postData, tag) {
+  for (let attempt = 0; attempt <= MAX_NETWORK_RETRY; attempt++) {
+    try {
+      return await httpsRequest(options, postData);
+    } catch (error) {
+      const errorText = `${error.code || ''} ${error.message || ''}`;
+      const isNetworkError = NETWORK_RETRY_TOKENS.some(token => errorText.includes(token));
+      if (!isNetworkError || attempt === MAX_NETWORK_RETRY) {
+        throw error;
+      }
+      console.warn(`[identify] ${tag} 网络瞬断，第 ${attempt + 1} 次重试`, error.message);
+      await sleep(500);
+    }
+  }
+  throw new Error('unreachable');
+}
+
+/**
  * 获取百度 access_token（带缓存）
  * @param {Boolean} forceRefresh - token 失效时强制刷新
  * @returns {Promise<String>} access_token
@@ -74,7 +110,7 @@ async function getAccessToken(forceRefresh) {
   }
 
   const path = `/oauth/2.0/token?grant_type=client_credentials&client_id=${BAIDU_API_KEY}&client_secret=${BAIDU_SECRET_KEY}`;
-  const data = await httpsRequest({ host: BAIDU_HOST, path, method: 'GET' }, null);
+  const data = await httpsRequestWithRetry({ host: BAIDU_HOST, path, method: 'GET' }, null, '获取token');
 
   if (!data.access_token) {
     throw new Error(`获取百度 token 失败: ${data.error_description || data.error || '未知错误'}`);
@@ -96,10 +132,10 @@ async function getAccessToken(forceRefresh) {
  * @param {Boolean} retried - 是否已重试过
  * @returns {Promise<Object>} 接口返回的识别结果
  */
-async function callBaiduApi(apiPath, imageBase64, retried) {
+async function callBaiduApi(apiPath, imageBase64, retried, tag) {
   const token = await getAccessToken(false);
   const postData = `image=${encodeURIComponent(imageBase64)}`;
-  const data = await httpsRequest({
+  const data = await httpsRequestWithRetry({
     host: BAIDU_HOST,
     path: `${apiPath}?access_token=${token}`,
     method: 'POST',
@@ -107,13 +143,13 @@ async function callBaiduApi(apiPath, imageBase64, retried) {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Content-Length': Buffer.byteLength(postData)
     }
-  }, postData);
+  }, postData, tag || '识别接口');
 
   if (data.error_code) {
     // token 失效：强制刷新后重试一次
     if ((data.error_code === 110 || data.error_code === 111) && !retried) {
       await getAccessToken(true);
-      return callBaiduApi(apiPath, imageBase64, true);
+      return callBaiduApi(apiPath, imageBase64, true, tag);
     }
     const error = new Error(data.error_msg || '百度识别接口报错');
     error.baiduCode = data.error_code;
@@ -220,9 +256,10 @@ exports.main = async (event) => {
     // 从云存储下载照片并转 base64
     const file = await cloud.downloadFile({ fileID });
     const imageBase64 = file.fileContent.toString('base64');
+    console.log('[identify] 照片下载完成，大小约', Math.round(file.fileContent.length / 1024), 'KB');
 
     // 第一步：通用识别粗分类
-    const general = await callBaiduApi(API_PATH.GENERAL, imageBase64);
+    const general = await callBaiduApi(API_PATH.GENERAL, imageBase64, false, '通用识别');
     const generalTop = general.result && general.result[0];
 
     if (!generalTop) {
@@ -231,6 +268,7 @@ exports.main = async (event) => {
 
     const root = generalTop.root || '';
     const keyword = generalTop.keyword || '';
+    console.log('[identify] 通用识别粗分类：', root, '/', keyword, '/', generalTop.score);
 
     // 第二步：按粗分类路由到垂类接口
     // 菌类优先判断（百度常把蘑菇粗分到 植物/食物，需用名称兜底）
@@ -248,11 +286,12 @@ exports.main = async (event) => {
     }
 
     if (root.includes('植物')) {
-      const plant = await callBaiduApi(API_PATH.PLANT, imageBase64);
+      const plant = await callBaiduApi(API_PATH.PLANT, imageBase64, false, '植物识别');
       const results = plant.result || [];
       if (!results.length) {
         return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
       }
+      console.log('[identify] 植物识别结果：', results[0].name, '/', results[0].score);
       const candidate = toCandidate(results[0], 'plant');
       if (candidate.confidence < FAIL_CONFIDENCE) {
         return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
@@ -266,11 +305,12 @@ exports.main = async (event) => {
     }
 
     if (root.includes('动物')) {
-      const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64);
+      const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64, false, '动物识别');
       const results = animal.result || [];
       if (!results.length) {
         return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
       }
+      console.log('[identify] 动物识别结果：', results[0].name, '/', results[0].score);
       const category = refineAnimalCategory(results[0].name);
       const candidate = toCandidate(results[0], category);
       if (candidate.confidence < FAIL_CONFIDENCE) {

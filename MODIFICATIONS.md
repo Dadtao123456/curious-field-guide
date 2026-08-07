@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-08-07 22:15
+
+- **描述**：接入真实图像识别（第 8 轮）。新增 identify 云函数：把前端上传到云存储的照片发给百度智能云，按 PRD 3.2 路由——通用识别粗分类，植物走百度植物、动物走百度动物（再按名称细分昆虫/鸟类）、菌类用通用识别兜底；置信度 < 0.5 或无结果返回失败，由结果页展示失败态。前端 `identifyImage` 默认改走真实识别，首页长按的 mock 测试场景保留。百度密钥放在 `config.local.js`（已加 .gitignore，不进仓库）。app 启动时初始化微信云开发。
+- **模块**：
+  - `curious-field-guide/cloudfunctions/identify/`（index.js、package.json、config.js 新增；config.local.js 本地保存不提交）
+  - `curious-field-guide/utils/api.js`、`curious-field-guide/app.js`、`curious-field-guide/utils/constants.js`
+  - `curious-field-guide/project.config.json`（新增 cloudfunctionRoot）、`.gitignore`
+- **备注**：
+  - 待用户操作：开通云开发并把环境 ID 填到 `utils/constants.js` 的 `CLOUD_ENV_ID`；在开发者工具里右键 `cloudfunctions/identify` →「上传并部署：云端安装依赖」。
+  - 已知占位：百度不返回拉丁名/百科文案/官方图，结果页这些字段暂为空（后续异步抓取补充）。
+  - 遗留：识别 loading 的 5 秒提示/10 秒可取消交互在联调轮统一补。
+
+---
+
 ## 2026-08-05 14:40
 
 - **描述**：修复「手动搜索收藏后图鉴看不到新增」的问题。根因：搜索候选若是 mock 历史发现已有的物种（如玉带凤蝶），收藏后与历史记录去重合并，图鉴总数不变，看起来没收藏上；且 addCollection 查重只查本地收藏缓存，不查历史发现，toast 误报「已收入图鉴」。修复：addCollection 查重扩展至历史发现，已有物种返回 duplicated 并提示「已在图鉴中」；结果页进入时若物种已在图鉴，按钮直接呈现「已收入图鉴」状态。

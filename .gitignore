@@ -13,6 +13,9 @@ miniprogram_npm/
 node_modules/
 project.private.config.json
 
+# 敏感配置（百度密钥等，禁止提交）
+config.local.js
+
 # Build outputs
 dist/
 build/

@@ -1,5 +1,6 @@
 {
   "description": "好奇图鉴 - 自然生物识别与个人图鉴收集工具",
+  "cloudfunctionRoot": "cloudfunctions/",
   "packOptions": {
     "ignore": [
       {

@@ -1,0 +1,9 @@
+{
+  "name": "identify",
+  "version": "1.0.0",
+  "description": "好奇图鉴-图像识别云函数（路由百度智能云识别接口）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

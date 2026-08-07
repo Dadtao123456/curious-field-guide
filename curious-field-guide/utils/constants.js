@@ -177,6 +177,10 @@ const COLORS = {
   }
 };
 
+// 微信云开发环境 ID
+// 说明：在微信开发者工具「云开发」控制台可查看；占位值会导致云调用失败，需替换为真实环境 ID
+const CLOUD_ENV_ID = 'TODO-replace-with-cloud-env-id';
+
 module.exports = {
   CATEGORIES,
   CATEGORY_LIST,
@@ -185,5 +189,6 @@ module.exports = {
   RARITY_TAGS,
   BADGES,
   BADGE_LIST,
-  COLORS
+  COLORS,
+  CLOUD_ENV_ID
 };

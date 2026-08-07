@@ -23,12 +23,64 @@ function getDashboard() {
 
 /**
  * 上传照片并请求识别
- * 说明：v1.0 为 mock；真实实现需上传 buffer 到云函数
+ * 说明：默认走真实云函数（上传云存储 → identify 云函数 → 百度识别）；
+ *       带 scenario 参数时走 mock（首页长按入口的测试场景）
  * @param {String} imagePath - 本地图片临时路径
  * @param {Object} options - 附加信息，如 location、scenario（mock 测试场景）
- * @returns {Promise<Object>} 识别结果
+ * @returns {Promise<Object>} 识别结果（success=false 时含 reason/message，由结果页展示失败态）
  */
 function identifyImage(imagePath, options = {}) {
+  if (options.scenario) {
+    return mockIdentify(imagePath, options);
+  }
+  return identifyByCloud(imagePath, options);
+}
+
+/**
+ * 真实识别：上传照片到云存储后调用 identify 云函数
+ * 说明：网络/服务异常统一转为 success=false 的失败结构，保证首页始终能跳转结果页失败态
+ * @param {String} imagePath - 本地图片临时路径
+ * @param {Object} options - 附加信息，如 location
+ * @returns {Promise<Object>} 识别结果
+ */
+function identifyByCloud(imagePath, options) {
+  return uploadIdentifyPhoto(imagePath).then(fileID => {
+    return wx.cloud.callFunction({
+      name: 'identify',
+      data: { fileID, location: options.location || '' }
+    });
+  }).then(res => {
+    const result = (res && res.result) || {};
+    if (typeof result.success === 'undefined') {
+      return { success: false, reason: 'empty_result', message: '识别服务暂时开小差了，请稍后再试' };
+    }
+    return result;
+  }).catch(error => {
+    console.error('[api] 识别请求失败', error);
+    return { success: false, reason: 'network', message: '网络异常，识别失败，请检查网络后重试' };
+  });
+}
+
+/**
+ * 把本地照片上传到云存储，返回 fileID
+ * 说明：照片经云存储中转，避免 base64 直接传参受 callFunction 数据量限制
+ * @param {String} imagePath - 本地图片临时路径
+ * @returns {Promise<String>} 云存储 fileID
+ */
+function uploadIdentifyPhoto(imagePath) {
+  const extMatch = imagePath.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+  const ext = extMatch ? extMatch[1] : 'jpg';
+  const cloudPath = `identify-photos/${Date.now()}-${Math.floor(Math.random() * 10000)}.${ext}`;
+  return wx.cloud.uploadFile({ cloudPath, filePath: imagePath }).then(res => res.fileID);
+}
+
+/**
+ * mock 识别：按测试场景返回预置数据
+ * @param {String} imagePath - 本地图片临时路径
+ * @param {Object} options - 含 scenario 测试场景
+ * @returns {Promise<Object>} 识别结果
+ */
+function mockIdentify(imagePath, options) {
   console.log('[api] mock identify', imagePath, options);
 
   // mock 测试场景：fail 返回识别失败，用于验证失败页分支

@@ -2,7 +2,7 @@
 // 负责：全局状态管理、隐私授权状态、静默登录占位、首次启动引导
 
 const auth = require('./utils/auth');
-const { STORAGE_KEYS } = require('./utils/constants');
+const { STORAGE_KEYS, CLOUD_ENV_ID } = require('./utils/constants');
 
 App({
   /**
@@ -24,7 +24,23 @@ App({
    * 说明：读取本地缓存的隐私授权状态，初始化全局数据
    */
   onLaunch() {
+    this.initCloud();
     this.loadPrivacyStatusFromStorage();
+  },
+
+  /**
+   * 初始化微信云开发
+   * 说明：基础库过低不支持云开发时降级（真实识别不可用，mock 场景仍可自测）
+   */
+  initCloud() {
+    if (!wx.cloud) {
+      console.error('[app] 当前微信版本过低，无法使用云开发能力');
+      return;
+    }
+    wx.cloud.init({
+      env: CLOUD_ENV_ID,
+      traceUser: true
+    });
   },
 
   /**

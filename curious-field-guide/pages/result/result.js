@@ -115,6 +115,8 @@ Page({
     }
 
     // 构建候选池：首选物种 + 其他候选，支持轮换切换
+    // confidenceText 为格式化后的置信度展示文本（真实接口返回多位小数，统一保留两位）
+    const formatConfidence = value => (value != null ? (Number(value) || 0).toFixed(2) : '');
     const pool = [{
       name: result.species.name,
       latinName: result.species.latinName,
@@ -124,8 +126,12 @@ Page({
       family: result.species.family,
       description: result.description,
       habitat: result.habitat,
-      confidence: result.confidence || 0
-    }, ...(result.alternatives || [])];
+      confidence: result.confidence || 0,
+      confidenceText: formatConfidence(result.confidence)
+    }, ...(result.alternatives || []).map(item => ({
+      ...item,
+      confidenceText: formatConfidence(item.confidence)
+    }))];
 
     // 置信度可能为 null（手动搜索无置信度），此时不展示低置信度黄条
     const confidence = result.confidence;

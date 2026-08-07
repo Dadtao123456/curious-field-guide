@@ -57,7 +57,7 @@
   <!-- 物种名称区 -->
   <view class="species-block mt-lg">
     <text class="species-name">{{species.name}}</text>
-    <text class="species-latin">{{species.latinName}}</text>
+    <text class="species-latin" wx:if="{{species.latinName}}">{{species.latinName}}</text>
     <rarity-tags tags="{{tags}}" class="species-tags" />
   </view>
 
@@ -76,7 +76,7 @@
         data-pool-index="{{item.poolIndex}}"
       >
         <text class="alternative-name">{{item.name}}</text>
-        <text class="alternative-confidence">置信度 {{item.confidence}}</text>
+        <text class="alternative-confidence">置信度 {{item.confidenceText}}</text>
       </view>
     </view>
   </view>
@@ -84,12 +84,12 @@
   <!-- 信息区块 -->
   <view class="info-card card mt-lg">
     <text class="info-title">形态特征</text>
-    <text class="info-text">{{species.description}}</text>
+    <text class="info-text">{{species.description || '百科内容整理中，敬请期待'}}</text>
   </view>
 
   <view class="info-card card mt-md">
     <text class="info-title">分布与习性</text>
-    <text class="info-text">{{species.habitat}}</text>
+    <text class="info-text">{{species.habitat || '百科内容整理中，敬请期待'}}</text>
   </view>
 
   <view class="info-card card mt-md">

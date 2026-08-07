@@ -27,8 +27,11 @@ const REQUEST_TIMEOUT = 8000;
 
 // 细分分类关键词：百度动物识别不区分昆虫/鸟类，按物种名称特征归类
 const INSECT_KEYWORDS = ['蝶', '蛾', '蜂', '蚁', '蝉', '蜻', '螳', '甲虫', '瓢虫', '蚊', '蝇', '蝗', '蟋', '萤', '蚜', '蝽', '虻', '螽', '蠹', '毛虫', '天牛', '金龟'];
-const BIRD_KEYWORDS = ['鸟', '雀', '鸽', '鹭', '鹰', '隼', '鸮', '雁', '鸭', '鹅', '鹤', '鹳', '鸥', '燕', '鸫', '鹎', '莺', '鹟', '雉', '鹃', '鸠', '鹦鹉', '鹂', '鸻', '鹬', '鹈', '鹗', '鸢'];
+const BIRD_KEYWORDS = ['鸟', '雀', '鸽', '鹭', '鹰', '隼', '鸮', '雁', '鸭', '鹅', '鹤', '鹳', '鸥', '燕', '鸫', '鹎', '莺', '鹟', '雉', '鹃', '鸠', '鹦鹉', '鹂', '鸻', '鹬', '鹈', '鹗', '鸢', '鸦', '鹊', '鸲', '鹀', '鹛', '鸬', '鹮', '鹑', '鸨', '鸵', '鹄', '鸳', '鸯', '鹫', '鹞', '鹌'];
 const FUNGI_KEYWORDS = ['菇', '菌', '蘑', '木耳', '灵芝', '银耳', '猴头', '竹荪', '虫草', '马勃'];
+
+// 百度垂类接口的兜底名称：识别不出具体物种时返回「非动物」「非植物」，出现即视为无有效结果
+const NEGATIVE_NAMES = ['非动物', '非植物'];
 
 // access_token 缓存（有效期约 30 天，提前 1 天刷新）；云函数实例复用时生效
 let cachedToken = null;
@@ -271,9 +274,10 @@ exports.main = async (event) => {
     console.log('[identify] 通用识别粗分类：', root, '/', keyword, '/', generalTop.score);
 
     // 第二步：按粗分类路由到垂类接口
-    // 菌类优先判断（百度常把蘑菇粗分到 植物/食物，需用名称兜底）
-    if (isFungi(keyword)) {
-      const candidate = toCandidate(generalTop, 'fungi');
+    // 菌类优先判断（百度常把蘑菇粗分到 植物/食物，需用名称兜底，检查前 3 条候选）
+    const fungiItem = (general.result || []).slice(0, 3).find(item => isFungi(item.keyword || ''));
+    if (fungiItem) {
+      const candidate = toCandidate(fungiItem, 'fungi');
       if (candidate.confidence < FAIL_CONFIDENCE) {
         return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
       }
@@ -285,9 +289,14 @@ exports.main = async (event) => {
       });
     }
 
-    if (root.includes('植物')) {
+    // 通用识别第一条的 root 可能为空（纯风景/艺术图），取第一条有明确大类的结果做路由
+    const classifiable = (general.result || []).find(item => item.root);
+    const routeRoot = classifiable ? classifiable.root : '';
+
+    if (routeRoot.includes('植物')) {
       const plant = await callBaiduApi(API_PATH.PLANT, imageBase64, false, '植物识别');
-      const results = plant.result || [];
+      // 过滤「非植物」等兜底名称
+      const results = (plant.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
       if (!results.length) {
         return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
       }
@@ -304,9 +313,10 @@ exports.main = async (event) => {
       });
     }
 
-    if (root.includes('动物')) {
+    if (routeRoot.includes('动物')) {
       const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64, false, '动物识别');
-      const results = animal.result || [];
+      // 过滤「非动物」等兜底名称
+      const results = (animal.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
       if (!results.length) {
         return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
       }

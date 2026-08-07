@@ -148,6 +148,7 @@ function isFungi(name) {
 
 /**
  * 把百度返回的一条结果转换为统一的候选物种格式
+ * 说明：百度的 score 字段是字符串（如 "0.86"），统一转成数字，避免前端类型错误
  * @param {Object} item - 百度结果项（name/keyword + score）
  * @param {String} category - 分类 key
  * @returns {Object} 候选物种
@@ -163,7 +164,7 @@ function toCandidate(item, category) {
     family: '',
     description: '',
     habitat: '',
-    confidence: item.score || 0
+    confidence: Number(item.score) || 0
   };
 }
 

@@ -4,23 +4,15 @@
   padding-bottom: var(--space-xxl);
 }
 
-/* 照片对比区 */
-.photo-compare {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.photo-box {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
+/* 用户照片（正方形大图）
+   页面内容宽 = 750rpx - 左右各 40rpx 内边距 = 670rpx，高取同值即为正方形 */
+.photo-single-img {
+  height: 670rpx;
 }
 
 .photo-img,
 .photo-placeholder {
   width: 100%;
-  height: 220rpx;
   border: var(--border-width) solid var(--border-color);
   border-radius: 8rpx 28rpx 12rpx 22rpx;
   overflow: hidden;
@@ -35,27 +27,8 @@
   transform: rotate(-1deg);
 }
 
-.photo-placeholder-id {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  transform: rotate(1deg);
-}
-
 .photo-emoji {
   font-size: 72rpx;
-}
-
-.photo-pending {
-  font-size: var(--text-small);
-  color: var(--gray);
-  font-family: var(--font-hand);
-  margin-top: var(--space-xs);
-}
-
-.photo-label {
-  font-size: var(--text-small);
-  color: var(--gray);
-  font-family: var(--font-hand);
-  text-align: center;
 }
 
 /* 物种名称区 */

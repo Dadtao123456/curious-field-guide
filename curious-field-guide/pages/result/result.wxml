@@ -35,22 +35,11 @@
     <text class="notice-text notice-text-blue">这是手动搜索的结果，非拍照识别，确认后可收入图鉴</text>
   </view>
 
-  <!-- 照片对比区 -->
-  <view class="photo-compare {{isUncertain || isFungi ? 'mt-md' : ''}}">
-    <view class="photo-box">
-      <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img" bindtap="onPhotoTap" data-type="user" />
-      <view wx:else class="photo-placeholder photo-placeholder-life">
-        <text class="photo-emoji">📷</text>
-      </view>
-      <text class="photo-label">生活照</text>
-    </view>
-    <view class="photo-box">
-      <image wx:if="{{officialPhotoUrl}}" src="{{officialPhotoUrl}}" mode="aspectFill" class="photo-img" bindtap="onPhotoTap" data-type="official" />
-      <view wx:else class="photo-placeholder photo-placeholder-id" bindtap="onPhotoTap" data-type="official">
-        <text class="photo-emoji">{{categoryEmoji}}</text>
-        <text class="photo-pending">标准图整理中</text>
-      </view>
-      <text class="photo-label">身份证照</text>
+  <!-- 用户拍摄的照片（正方形大图，点击看原图） -->
+  <view class="photo-single {{isUncertain || isFungi ? 'mt-md' : ''}}">
+    <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img photo-single-img" bindtap="onPhotoTap" data-type="user" />
+    <view wx:else class="photo-placeholder photo-placeholder-life photo-single-img">
+      <text class="photo-emoji">📷</text>
     </view>
   </view>
 

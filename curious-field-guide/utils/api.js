@@ -201,7 +201,13 @@ function getDiscoveryById(key) {
         userPhotoUrl: collected.userPhotoUrl || '',
         location: collected.location || '未知地点',
         discoveredAt: collected.collectedAt,
-        rarityTags: []
+        rarityTags: [],
+        // 收藏时保存的百科字段（真实识别物种在 mock 列表中查不到，必须从这里取）
+        description: collected.description || '',
+        habitat: collected.habitat || '',
+        order: collected.order || '',
+        family: collected.family || '',
+        officialPhotoUrl: collected.officialPhotoUrl || ''
       };
     }
   }
@@ -212,13 +218,14 @@ function getDiscoveryById(key) {
 
   const species = MOCK_SPECIES_LIST.find(item => item.speciesKey === record.speciesKey) || {};
 
+  // 百科字段优先用记录自身存储的（真实识别物种），mock 列表兜底（历史发现）
   return Promise.resolve({
     ...record,
-    description: species.description || '',
-    habitat: species.habitat || '',
-    order: species.order || '',
-    family: species.family || '',
-    officialPhotoUrl: species.officialPhotoUrl || ''
+    description: record.description || species.description || '',
+    habitat: record.habitat || species.habitat || '',
+    order: record.order || species.order || '',
+    family: record.family || species.family || '',
+    officialPhotoUrl: record.officialPhotoUrl || species.officialPhotoUrl || ''
   });
 }
 

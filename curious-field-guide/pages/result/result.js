@@ -164,6 +164,7 @@ Page({
     api.getDiscoveryById(id).then(record => {
       this.setData({
         userPhotoUrl: record.userPhotoUrl || '',
+        officialPhotoUrl: record.officialPhotoUrl || '',
         isFungi: record.category === 'fungi',
         tags: parseRarityTags(record.rarityTags || []),
         discovery: {
@@ -381,6 +382,12 @@ Page({
       latinName: this.data.species.latinName,
       speciesKey: this.data.species.speciesKey,
       category: this.data.species.category,
+      order: this.data.species.order,
+      family: this.data.species.family,
+      // 百科内容一并收藏，图鉴/最近发现打开时才能完整展示
+      description: this.data.species.description,
+      habitat: this.data.species.habitat,
+      officialPhotoUrl: this.data.officialPhotoUrl,
       location: this.data.discovery.location,
       userPhotoUrl: this.data.userPhotoUrl,
       rarityTags: this.data.tags.map(tag => tag.label)

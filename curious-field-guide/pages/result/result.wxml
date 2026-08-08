@@ -83,13 +83,14 @@
 
   <!-- 信息区块 -->
   <view class="info-card card mt-lg">
-    <text class="info-title">形态特征</text>
+    <text class="info-title">百科简介</text>
     <text class="info-text">{{species.description || '百科内容整理中，敬请期待'}}</text>
   </view>
 
-  <view class="info-card card mt-md">
+  <!-- 分布与习性：暂无独立数据源，有内容时才展示 -->
+  <view class="info-card card mt-md" wx:if="{{species.habitat}}">
     <text class="info-title">分布与习性</text>
-    <text class="info-text">{{species.habitat || '百科内容整理中，敬请期待'}}</text>
+    <text class="info-text">{{species.habitat}}</text>
   </view>
 
   <view class="info-card card mt-md">

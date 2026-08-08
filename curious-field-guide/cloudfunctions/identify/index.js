@@ -137,11 +137,13 @@ async function getAccessToken(forceRefresh) {
  * @param {String} apiPath - 接口路径
  * @param {String} imageBase64 - 图片 base64（不含前缀）
  * @param {Boolean} retried - 是否已重试过
+ * @param {String} tag - 日志标记
+ * @param {Boolean} withBaike - 是否带 baike_num=1（动植物接口返回百度百科简介/图片）
  * @returns {Promise<Object>} 接口返回的识别结果
  */
-async function callBaiduApi(apiPath, imageBase64, retried, tag) {
+async function callBaiduApi(apiPath, imageBase64, retried, tag, withBaike) {
   const token = await getAccessToken(false);
-  const postData = `image=${encodeURIComponent(imageBase64)}`;
+  const postData = `image=${encodeURIComponent(imageBase64)}${withBaike ? '&baike_num=1' : ''}`;
   const data = await httpsRequestWithRetry({
     host: BAIDU_HOST,
     path: `${apiPath}?access_token=${token}`,
@@ -156,7 +158,7 @@ async function callBaiduApi(apiPath, imageBase64, retried, tag) {
     // token 失效：强制刷新后重试一次
     if ((data.error_code === 110 || data.error_code === 111) && !retried) {
       await getAccessToken(true);
-      return callBaiduApi(apiPath, imageBase64, true, tag);
+      return callBaiduApi(apiPath, imageBase64, true, tag, withBaike);
     }
     const error = new Error(data.error_msg || '百度识别接口报错');
     error.baiduCode = data.error_code;
@@ -287,10 +289,20 @@ async function enrichFromINat(chineseName) {
 
 /**
  * 组装识别成功的返回结构（与结果页数据契约保持一致）
- * 说明：识别结果先经 iNaturalist 百科增强；增强失败时百科字段为空，前端显示占位
+ * 说明：百科内容合并策略——
+ *   简介：百度百科（baike_num 返回，中文且详细）优先，iNaturalist 维基简介兜底
+ *   标准图：iNaturalist（CC 授权）优先，百度百科图片兜底（http 统一转 https）
+ *   拉丁名/目科：iNaturalist 提供，百度百科不含结构化分类
+ *   两个来源都失败时百科字段为空，前端显示占位
  */
-async function buildSuccessResult({ candidate, alternatives, source, location }) {
+async function buildSuccessResult({ candidate, alternatives, source, location, baike }) {
   const enrichment = await enrichFromINat(candidate.name);
+
+  const baikeDescription = baike && baike.description ? baike.description : '';
+  const baikePhoto = baike && baike.image_url ? baike.image_url.replace(/^http:/, 'https:') : '';
+  const officialPhotoUrl = enrichment && enrichment.officialPhotoUrl
+    ? enrichment.officialPhotoUrl
+    : baikePhoto;
 
   return {
     success: true,
@@ -302,11 +314,11 @@ async function buildSuccessResult({ candidate, alternatives, source, location })
       order: enrichment ? enrichment.order : candidate.order,
       family: enrichment ? enrichment.family : candidate.family
     },
-    // 分布与习性暂无可靠数据源，保持占位
-    description: enrichment ? enrichment.description : '',
+    // 分布与习性暂无独立数据源（百科简介通常涵盖），保持占位
+    description: baikeDescription || (enrichment ? enrichment.description : ''),
     habitat: '',
-    officialPhotoUrl: enrichment ? enrichment.officialPhotoUrl : '',
-    officialPhotoStatus: enrichment && enrichment.officialPhotoUrl ? 'ready' : 'pending',
+    officialPhotoUrl,
+    officialPhotoStatus: officialPhotoUrl ? 'ready' : 'pending',
     confidence: candidate.confidence,
     source,
     note: candidate.category === 'fungi' ? '菌类仅供观赏参考，可能有毒，请勿采食' : null,
@@ -375,7 +387,7 @@ exports.main = async (event) => {
     const routeRoot = classifiable ? classifiable.root : '';
 
     if (routeRoot.includes('植物')) {
-      const plant = await callBaiduApi(API_PATH.PLANT, imageBase64, false, '植物识别');
+      const plant = await callBaiduApi(API_PATH.PLANT, imageBase64, false, '植物识别', true);
       // 过滤「非植物」等兜底名称
       const results = (plant.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
       if (!results.length) {
@@ -390,12 +402,13 @@ exports.main = async (event) => {
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, 'plant')),
         source: 'baidu-plant',
-        location
+        location,
+        baike: results[0].baike_info || null
       });
     }
 
     if (routeRoot.includes('动物')) {
-      const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64, false, '动物识别');
+      const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64, false, '动物识别', true);
       // 过滤「非动物」等兜底名称
       const results = (animal.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
       if (!results.length) {
@@ -411,7 +424,8 @@ exports.main = async (event) => {
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, refineAnimalCategory(item.name))),
         source: 'baidu-animal',
-        location
+        location,
+        baike: results[0].baike_info || null
       });
     }
 

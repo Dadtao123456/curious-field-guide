@@ -33,6 +33,10 @@ const FUNGI_KEYWORDS = ['菇', '菌', '蘑', '木耳', '灵芝', '银耳', '猴�
 // 百度垂类接口的兜底名称：识别不出具体物种时返回「非动物」「非植物」，出现即视为无有效结果
 const NEGATIVE_NAMES = ['非动物', '非植物'];
 
+// iNaturalist 百科数据源配置（免费开放 API，无需密钥）
+// 用途：百度识别只返回物种名和置信度，百科内容（拉丁名/简介/标准图/目科）从这里补充
+const INAT_HOST = 'api.inaturalist.org';
+
 // access_token 缓存（有效期约 30 天，提前 1 天刷新）；云函数实例复用时生效
 let cachedToken = null;
 
@@ -208,24 +212,101 @@ function toCandidate(item, category) {
 }
 
 /**
- * 组装识别成功的返回结构（与结果页数据契约保持一致）
+ * 去除 HTML 标签（iNat 的维基简介含 <b>/<i> 等标签）
+ * @param {String} text - 原始文本
+ * @returns {String} 纯文本
  */
-function buildSuccessResult({ candidate, alternatives, source, location }) {
+function stripHtml(text) {
+  return (text || '').replace(/<[^>]+>/g, '').trim();
+}
+
+/**
+ * 调用 iNaturalist 接口（GET + JSON）
+ * @param {String} path - 接口路径（含查询参数）
+ * @returns {Promise<Object>} 解析后的 JSON 响应
+ */
+function inatGet(path) {
+  return httpsRequestWithRetry({
+    host: INAT_HOST,
+    path,
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'curious-field-guide/1.0'
+    }
+  }, null, 'iNat百科');
+}
+
+/**
+ * 从 iNaturalist 抓取物种百科信息
+ * 说明：任何一步失败都返回 null，由调用方降级为占位内容，不影响识别主流程
+ * @param {String} chineseName - 百度识别出的中文物种名
+ * @returns {Promise<Object|null>} { latinName, description, officialPhotoUrl, order, family } 或 null
+ */
+async function enrichFromINat(chineseName) {
+  try {
+    // 第一步：按中文名搜索物种（autocomplete 对中文俗名匹配最好）
+    const auto = await inatGet(`/v1/taxa/autocomplete?q=${encodeURIComponent(chineseName)}&locale=zh-CN&per_page=5`);
+    const results = auto.results || [];
+    if (!results.length) {
+      return null;
+    }
+
+    // 优先选种/亚种级别且名称精确匹配的；没有则取第一条
+    const target = results.find(item =>
+      ['species', 'subspecies'].includes(item.rank) &&
+      (item.preferred_common_name === chineseName || item.name === chineseName)
+    ) || results[0];
+
+    // 第二步：取物种详情（简介/标准图/分类阶元都在详情里）
+    const detail = await inatGet(`/v1/taxa/${target.id}?locale=zh-CN`);
+    const taxon = (detail.results || [])[0];
+    if (!taxon) {
+      return null;
+    }
+
+    // 从分类阶元中取目/科的中文名（无中文名则用拉丁名）
+    const ancestors = taxon.ancestors || [];
+    const findAncestor = (rank) => {
+      const hit = ancestors.find(item => item.rank === rank);
+      return hit ? (hit.preferred_common_name || hit.name) : '';
+    };
+
+    return {
+      latinName: taxon.name || '',
+      description: stripHtml(taxon.wikipedia_summary),
+      officialPhotoUrl: (taxon.default_photo && taxon.default_photo.medium_url) || '',
+      order: findAncestor('order'),
+      family: findAncestor('family')
+    };
+  } catch (error) {
+    console.warn('[identify] iNat 百科增强失败，降级为占位内容', error.message);
+    return null;
+  }
+}
+
+/**
+ * 组装识别成功的返回结构（与结果页数据契约保持一致）
+ * 说明：识别结果先经 iNaturalist 百科增强；增强失败时百科字段为空，前端显示占位
+ */
+async function buildSuccessResult({ candidate, alternatives, source, location }) {
+  const enrichment = await enrichFromINat(candidate.name);
+
   return {
     success: true,
     species: {
       name: candidate.name,
-      latinName: candidate.latinName,
+      latinName: enrichment ? enrichment.latinName : candidate.latinName,
       speciesKey: candidate.speciesKey,
       category: candidate.category,
-      order: candidate.order,
-      family: candidate.family
+      order: enrichment ? enrichment.order : candidate.order,
+      family: enrichment ? enrichment.family : candidate.family
     },
-    // 官方图与百科文案为 v1.0 占位，后续异步抓取补充
-    description: '',
+    // 分布与习性暂无可靠数据源，保持占位
+    description: enrichment ? enrichment.description : '',
     habitat: '',
-    officialPhotoUrl: '',
-    officialPhotoStatus: 'pending',
+    officialPhotoUrl: enrichment ? enrichment.officialPhotoUrl : '',
+    officialPhotoStatus: enrichment && enrichment.officialPhotoUrl ? 'ready' : 'pending',
     confidence: candidate.confidence,
     source,
     note: candidate.category === 'fungi' ? '菌类仅供观赏参考，可能有毒，请勿采食' : null,
@@ -281,7 +362,7 @@ exports.main = async (event) => {
       if (candidate.confidence < FAIL_CONFIDENCE) {
         return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
       }
-      return buildSuccessResult({
+      return await buildSuccessResult({
         candidate,
         alternatives: [],
         source: 'baidu-general',
@@ -305,7 +386,7 @@ exports.main = async (event) => {
       if (candidate.confidence < FAIL_CONFIDENCE) {
         return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
       }
-      return buildSuccessResult({
+      return await buildSuccessResult({
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, 'plant')),
         source: 'baidu-plant',
@@ -326,7 +407,7 @@ exports.main = async (event) => {
       if (candidate.confidence < FAIL_CONFIDENCE) {
         return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
       }
-      return buildSuccessResult({
+      return await buildSuccessResult({
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, refineAnimalCategory(item.name))),
         source: 'baidu-animal',

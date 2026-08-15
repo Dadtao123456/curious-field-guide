@@ -24,6 +24,89 @@
   font-size: 56rpx;
 }
 
+/* 用户头像图片：铺满圆形手绘边框 */
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* 用户信息区右侧的编辑入口 */
+.user-edit-hint {
+  margin-left: auto;
+  font-size: var(--text-caption);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+/* 编辑资料弹层 */
+.edit-title {
+  font-size: var(--text-h2);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}
+
+/* chooseAvatar 按钮：去掉默认按钮样式，只保留圆形头像 */
+.edit-avatar-btn {
+  width: 140rpx;
+  height: 140rpx;
+  padding: 0;
+  border: var(--border-width-lg) solid var(--border-color);
+  border-radius: 50%;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+  overflow: hidden;
+}
+
+.edit-avatar-btn::after {
+  border: none;
+}
+
+.edit-avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.edit-avatar-emoji {
+  font-size: 64rpx;
+}
+
+.edit-hint {
+  font-size: var(--text-caption);
+  color: var(--gray);
+  font-family: var(--font-hand);
+}
+
+.edit-nickname-input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 var(--space-md);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 10rpx 24rpx 14rpx 20rpx;
+  box-sizing: border-box;
+  font-size: var(--text-body);
+  color: var(--pencil);
+  font-family: var(--font-hand);
+  text-align: center;
+}
+
+.edit-actions {
+  width: 100%;
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.edit-btn {
+  flex: 1;
+  height: 80rpx;
+  font-size: 28rpx;
+}
+
 .user-info {
   display: flex;
   flex-direction: column;

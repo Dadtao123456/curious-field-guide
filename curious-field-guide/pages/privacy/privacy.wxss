@@ -1,1 +1,10 @@
 /* 隐私政策页样式 */
+
+/* 章节标题：比正文大一号的手绘体 */
+.privacy-h2 {
+  display: block;
+  font-size: var(--text-h3);
+  font-weight: 700;
+  color: var(--pencil);
+  font-family: var(--font-hand);
+}

@@ -1,17 +1,32 @@
 // 好奇图鉴 - 我的页逻辑
-// 数据流：onShow 加载收藏数据 → 计算统计/徽章 → 渲染；菜单项跳转或占位提示
+// 数据流：onShow 加载收藏数据 + 用户资料 → 计算统计/徽章 → 渲染；菜单项跳转或占位提示
 
 const api = require('../../utils/api');
 const { summarizeCollections, evaluateBadges } = require('../../utils/gamification');
+const { STORAGE_KEYS } = require('../../utils/constants');
+
+// 默认资料：未设置头像昵称时的展示
+const DEFAULT_PROFILE = {
+  nickname: '好奇宝宝',
+  avatarEmoji: '🌿'
+};
 
 Page({
   /**
    * 页面数据状态
    */
   data: {
-    // 用户信息（mock 昵称，接入微信登录后替换）
-    nickname: '好奇探索者',
-    avatarEmoji: '🌿',
+    // 用户昵称（默认「好奇宝宝」，可在编辑资料中修改）
+    nickname: DEFAULT_PROFILE.nickname,
+    // 用户头像图片路径（微信 chooseAvatar 返回的临时路径）；为空时显示默认 emoji
+    avatarUrl: '',
+    // 默认头像 emoji（无头像时展示）
+    avatarEmoji: DEFAULT_PROFILE.avatarEmoji,
+    // 是否显示编辑资料弹层
+    showEditModal: false,
+    // 编辑中的草稿（保存才生效）
+    draftAvatarUrl: '',
+    draftNickname: '',
     // 加入天数（按最早发现日期计算）
     joinDays: 0,
     // 三项统计
@@ -30,10 +45,90 @@ Page({
 
   /**
    * 页面显示时刷新
-   * 说明：tabBar 页面，收藏变化后统计与徽章需同步
+   * 说明：tabBar 页面，收藏变化后统计与徽章需同步；用户资料也从缓存刷新
    */
   onShow() {
+    this.loadUserProfile();
     this.loadProfile();
+  },
+
+  /**
+   * 从本地缓存读取用户资料
+   * 说明：取不到时使用默认资料（好奇宝宝 + 🌿）
+   */
+  loadUserProfile() {
+    try {
+      const profile = wx.getStorageSync(STORAGE_KEYS.USER_PROFILE);
+      if (profile && profile.nickname) {
+        this.setData({
+          nickname: profile.nickname,
+          avatarUrl: profile.avatarUrl || ''
+        });
+      }
+    } catch (error) {
+      console.error('[profile] 读取用户资料失败', error);
+    }
+  },
+
+  /**
+   * 点击用户信息区，打开编辑资料弹层
+   */
+  onEditProfile() {
+    this.setData({
+      showEditModal: true,
+      draftAvatarUrl: this.data.avatarUrl,
+      draftNickname: this.data.nickname
+    });
+  },
+
+  /**
+   * 微信官方「选择头像」回调
+   * 说明：返回的是临时路径，仅本次安装有效；收藏上云后需转存云存储
+   */
+  onChooseAvatar(event) {
+    this.setData({ draftAvatarUrl: event.detail.avatarUrl });
+  },
+
+  /**
+   * 昵称输入（type="nickname" 自带微信昵称联想）
+   */
+  onNicknameInput(event) {
+    this.setData({ draftNickname: event.detail.value });
+  },
+
+  /**
+   * 保存资料：写本地缓存并刷新展示
+   */
+  onSaveProfile() {
+    const nickname = (this.data.draftNickname || '').trim();
+    if (!nickname) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
+    }
+
+    const profile = {
+      nickname,
+      avatarUrl: this.data.draftAvatarUrl
+    };
+    try {
+      wx.setStorageSync(STORAGE_KEYS.USER_PROFILE, profile);
+      this.setData({
+        nickname: profile.nickname,
+        avatarUrl: profile.avatarUrl,
+        showEditModal: false
+      });
+      wx.showToast({ title: '已保存', icon: 'none' });
+    } catch (error) {
+      console.error('[profile] 保存用户资料失败', error);
+      wx.showToast({ title: '保存失败，请重试', icon: 'none' });
+    }
+  },
+
+  /**
+   * 关闭编辑资料弹层（不保存）
+   */
+  onCloseEditModal() {
+    this.setData({ showEditModal: false });
   },
 
   /**

@@ -2,16 +2,18 @@
 <!-- 数据流：onShow 加载收藏数据 → 统计/徽章渲染 → 菜单跳转或占位提示 -->
 
 <view class="page-container profile-page">
-  <!-- 用户信息区 -->
-  <view class="user-block">
+  <!-- 用户信息区（点击进入编辑资料） -->
+  <view class="user-block" bindtap="onEditProfile">
     <view class="avatar">
-      <text class="avatar-emoji">{{avatarEmoji}}</text>
+      <image wx:if="{{avatarUrl}}" src="{{avatarUrl}}" mode="aspectFill" class="avatar-img" />
+      <text wx:else class="avatar-emoji">{{avatarEmoji}}</text>
     </view>
     <view class="user-info">
       <text class="user-nickname">{{nickname}}</text>
       <text class="user-join" wx:if="{{joinDays > 0}}">加入好奇图鉴 {{joinDays}} 天</text>
       <text class="user-join" wx:else>还没有发现，去拍第一张吧</text>
     </view>
+    <text class="user-edit-hint">编辑 ›</text>
   </view>
 
   <!-- 三项统计 -->
@@ -90,5 +92,31 @@
     <text class="badge-modal-desc">{{activeBadge.description}}</text>
     <text class="badge-modal-status">🎉 已解锁</text>
     <view class="btn btn-secondary badge-modal-btn" bindtap="onCloseBadgeModal">知道了</view>
+  </view>
+</view>
+
+<!-- 编辑资料弹层（微信官方头像昵称填写能力） -->
+<view class="badge-modal-mask" wx:if="{{showEditModal}}" bindtap="onCloseEditModal">
+  <view class="badge-modal" catchtap="onModalContentTap">
+    <text class="edit-title">编辑资料</text>
+    <!-- 头像：button open-type="chooseAvatar" 调起微信官方选头像 -->
+    <button class="edit-avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{draftAvatarUrl}}" src="{{draftAvatarUrl}}" mode="aspectFill" class="edit-avatar-img" />
+      <text wx:else class="edit-avatar-emoji">{{avatarEmoji}}</text>
+    </button>
+    <text class="edit-hint">点头像可更换</text>
+    <!-- 昵称：type="nickname" 自带微信昵称联想键盘 -->
+    <input
+      class="edit-nickname-input"
+      type="nickname"
+      value="{{draftNickname}}"
+      placeholder="给自己起个名字"
+      maxlength="20"
+      bindinput="onNicknameInput"
+    />
+    <view class="edit-actions">
+      <view class="btn btn-secondary edit-btn" bindtap="onCloseEditModal">取消</view>
+      <view class="btn btn-primary edit-btn" bindtap="onSaveProfile">保存</view>
+    </view>
   </view>
 </view>

@@ -40,7 +40,9 @@ const STORAGE_KEYS = {
   PRIVACY_STATUS: 'privacy_status',
   IDENTIFY_RESULT: 'identify_result',
   COLLECTIONS: 'mock_collections',
-  SHARE_CARD: 'share_card_data'
+  SHARE_CARD: 'share_card_data',
+  // 用户资料（头像临时路径 + 昵称），收藏上云后迁移到数据库
+  USER_PROFILE: 'user_profile'
 };
 
 /**

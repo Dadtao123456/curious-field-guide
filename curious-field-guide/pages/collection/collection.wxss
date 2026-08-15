@@ -50,6 +50,12 @@
   font-size: 40rpx;
 }
 
+/* 分类手绘图标（仪表盘） */
+.dash-icon {
+  width: 56rpx;
+  height: 56rpx;
+}
+
 .dash-count {
   font-size: var(--text-h4);
   font-weight: 700;
@@ -138,6 +144,13 @@
 
 .grid-emoji {
   font-size: 72rpx;
+  transform: rotate(-2deg);
+}
+
+/* 分类手绘图标（网格卡片兜底，无实拍图时展示） */
+.grid-icon {
+  width: 70%;
+  height: 70%;
   transform: rotate(-2deg);
 }
 

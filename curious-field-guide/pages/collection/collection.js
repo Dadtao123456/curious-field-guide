@@ -2,7 +2,7 @@
 // 数据流：onShow 加载收藏列表 → 计算统计与分类 tabs → 筛选渲染网格 → 点击卡片跳结果页只读模式
 
 const api = require('../../utils/api');
-const { CATEGORY_LIST, CATEGORY_EMOJI_MAP } = require('../../utils/constants');
+const { CATEGORY_LIST, CATEGORY_ICON_MAP } = require('../../utils/constants');
 const { parseRarityTags } = require('../../utils/format');
 const { summarizeCollections } = require('../../utils/gamification');
 
@@ -41,7 +41,7 @@ Page({
     api.getCollections().then(list => {
       const items = list.map(item => ({
         ...item,
-        emoji: CATEGORY_EMOJI_MAP[item.category] || '🔍',
+        icon: CATEGORY_ICON_MAP[item.category] || '',
         tags: parseRarityTags(item.rarityTags || [])
       }));
 
@@ -64,7 +64,7 @@ Page({
 
     const categoryStats = CATEGORY_LIST.map(cat => ({
       key: cat.key,
-      emoji: cat.emoji,
+      icon: cat.icon,
       label: cat.label,
       count: countMap[cat.key] || 0
     }));

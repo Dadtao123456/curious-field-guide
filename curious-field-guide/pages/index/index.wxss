@@ -175,6 +175,12 @@
   border-radius: inherit;
 }
 
+/* 分类手绘图标（无实拍图时兜底） */
+.recent-thumb-icon {
+  width: 80%;
+  height: 80%;
+}
+
 .recent-info {
   flex: 1;
   display: flex;

@@ -15,7 +15,7 @@
       wx:key="key"
       class="dash-item dash-rotate-{{index}}"
     >
-      <text class="dash-emoji">{{item.emoji}}</text>
+      <image class="dash-icon" src="{{item.icon}}" mode="aspectFit" />
       <text class="dash-count">{{item.count}}</text>
       <text class="dash-label">{{item.label}}</text>
     </view>
@@ -45,7 +45,7 @@
     >
       <view class="grid-img">
         <image wx:if="{{item.userPhotoUrl}}" src="{{item.userPhotoUrl}}" mode="aspectFill" class="grid-photo" />
-        <text wx:else class="grid-emoji">{{item.emoji}}</text>
+        <image wx:else class="grid-icon" src="{{item.icon}}" mode="aspectFit" />
       </view>
       <view class="grid-info">
         <view class="grid-tags" wx:if="{{item.tags.length > 0}}">

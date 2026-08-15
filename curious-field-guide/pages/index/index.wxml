@@ -41,7 +41,7 @@
       >
         <view class="recent-thumb">
           <image wx:if="{{item.userPhotoUrl}}" src="{{item.userPhotoUrl}}" mode="aspectFill" class="recent-thumb-img" />
-          <text wx:else class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>
+          <image wx:else src="{{categoryIconMap[item.category]}}" mode="aspectFit" class="recent-thumb-icon" />
         </view>
         <view class="recent-info">
           <view class="recent-name-row">

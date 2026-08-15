@@ -3,7 +3,7 @@
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
-const { CATEGORIES, CATEGORY_EMOJI_MAP, STORAGE_KEYS } = require('../../utils/constants');
+const { CATEGORIES, CATEGORY_ICON_MAP, STORAGE_KEYS } = require('../../utils/constants');
 const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
 
 Page({
@@ -21,8 +21,8 @@ Page({
     showPrivacyModal: false,
     // 是否仅浏览模式
     isBrowseOnly: false,
-    // 分类 emoji 映射，用于列表渲染
-    categoryEmojiMap: {}
+    // 分类手绘图标映射，用于最近发现列表无实拍图时的兜底
+    categoryIconMap: {}
   },
 
   /**
@@ -46,7 +46,7 @@ Page({
    * 说明：直接使用 constants 生成的映射，供 wxml 列表渲染
    */
   initCategoryEmojiMap() {
-    this.setData({ categoryEmojiMap: CATEGORY_EMOJI_MAP });
+    this.setData({ categoryIconMap: CATEGORY_ICON_MAP });
   },
 
   /**

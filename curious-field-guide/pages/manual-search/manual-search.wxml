@@ -40,7 +40,7 @@
       data-index="{{index}}"
     >
       <view class="candidate-thumb">
-        <text class="candidate-emoji">{{item.emoji}}</text>
+        <image class="candidate-icon" src="{{item.icon}}" mode="aspectFit" />
       </view>
       <view class="candidate-info">
         <text class="candidate-name">{{item.name}}</text>

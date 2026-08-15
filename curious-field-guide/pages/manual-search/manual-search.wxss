@@ -90,6 +90,12 @@
   font-size: 48rpx;
 }
 
+/* 分类手绘图标（搜索候选缩略图） */
+.candidate-icon {
+  width: 80%;
+  height: 80%;
+}
+
 .candidate-info {
   flex: 1;
   display: flex;

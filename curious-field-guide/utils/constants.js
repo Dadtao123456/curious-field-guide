@@ -6,11 +6,11 @@
  * 说明：PRD 约定的五类识别范围
  */
 const CATEGORIES = {
-  INSECT: { key: 'insect', label: '昆虫', emoji: '🦋' },
-  PLANT: { key: 'plant', label: '植物', emoji: '🌿' },
-  BIRD: { key: 'bird', label: '鸟类', emoji: '🐦' },
-  FUNGI: { key: 'fungi', label: '菌类', emoji: '🍄' },
-  ANIMAL: { key: 'animal', label: '动物', emoji: '🐿️' }
+  INSECT: { key: 'insect', label: '昆虫', emoji: '🦋', icon: '/images/icons/icon-insect.png' },
+  PLANT: { key: 'plant', label: '植物', emoji: '🌿', icon: '/images/icons/icon-plant.png' },
+  BIRD: { key: 'bird', label: '鸟类', emoji: '🐦', icon: '/images/icons/icon-bird.png' },
+  FUNGI: { key: 'fungi', label: '菌类', emoji: '🍄', icon: '/images/icons/icon-fungi.png' },
+  ANIMAL: { key: 'animal', label: '动物', emoji: '🐿️', icon: '/images/icons/icon-animal.png' }
 };
 
 /**
@@ -26,9 +26,18 @@ const CATEGORY_LIST = [
 
 /**
  * 分类 emoji 映射（由 CATEGORY_LIST 生成，供页面直接渲染）
+ * 说明：emoji 保留作为分享卡片 canvas 等不便加载图片场景的兜底
  */
 const CATEGORY_EMOJI_MAP = CATEGORY_LIST.reduce((map, item) => {
   map[item.key] = item.emoji;
+  return map;
+}, {});
+
+/**
+ * 分类图标路径映射（手绘 icon，优先于 emoji 使用）
+ */
+const CATEGORY_ICON_MAP = CATEGORY_LIST.reduce((map, item) => {
+  map[item.key] = item.icon;
   return map;
 }, {});
 
@@ -182,6 +191,7 @@ module.exports = {
   CATEGORIES,
   CATEGORY_LIST,
   CATEGORY_EMOJI_MAP,
+  CATEGORY_ICON_MAP,
   STORAGE_KEYS,
   RARITY_TAGS,
   BADGES,

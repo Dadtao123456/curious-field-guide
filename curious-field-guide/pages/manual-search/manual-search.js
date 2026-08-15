@@ -2,7 +2,7 @@
 // 数据流：输入关键词 → api.searchSpecies → 渲染候选列表 → 点击候选带数据进结果页（手动搜索模式）
 
 const api = require('../../utils/api');
-const { CATEGORY_EMOJI_MAP, STORAGE_KEYS } = require('../../utils/constants');
+const { CATEGORY_ICON_MAP, STORAGE_KEYS } = require('../../utils/constants');
 
 Page({
   /**
@@ -41,7 +41,7 @@ Page({
     api.searchSpecies(keyword).then(results => {
       const list = results.map(item => ({
         ...item,
-        emoji: CATEGORY_EMOJI_MAP[item.category] || '🔍'
+        icon: CATEGORY_ICON_MAP[item.category] || ''
       }));
 
       this.setData({

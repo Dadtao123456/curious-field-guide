@@ -45,14 +45,9 @@ const STORAGE_KEYS = {
 
 /**
  * 稀有度标签定义
- * 说明：PRD v1.0 支持的三种标签，按优先级排序
+ * 说明：v1.0 支持的两种标签，按优先级排序（「首次发现」已下线）
  */
 const RARITY_TAGS = {
-  FIRST_DISCOVERY: {
-    type: 'first_discovery',
-    label: '首次发现',
-    color: 'green'
-  },
   STREAK: {
     type: 'streak',
     label: '连续 N 天',

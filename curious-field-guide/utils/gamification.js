@@ -4,19 +4,6 @@
 const { RARITY_TAGS, BADGE_LIST } = require('./constants');
 
 /**
- * 判断是否为首次发现
- * @param {String} speciesKey - 物种查重键
- * @param {Array} existingKeys - 用户已收藏的 speciesKey 列表
- * @returns {Boolean}
- */
-function isFirstDiscovery(speciesKey, existingKeys) {
-  if (!speciesKey || !Array.isArray(existingKeys)) {
-    return false;
-  }
-  return !existingKeys.includes(speciesKey);
-}
-
-/**
  * 判断是否为夜间发现
  * 说明：PRD 约定 20:00 - 06:00 为夜间
  * @param {Date|String|Number} date - 发现时间
@@ -74,19 +61,16 @@ function calculateStreak(discoveryDates) {
 
 /**
  * 计算稀有度标签
- * 说明：PRD v1.0 支持三种标签：首次发现、连续 N 天、夜间发现
- * @param {String} speciesKey - 当前物种查重键
- * @param {Array} existingKeys - 已收藏查重键列表
+ * 说明：v1.0 支持两种标签：连续 N 天、夜间发现
+ *      （「首次发现」已下线：图鉴内所有物种都是首次发现，标签无信息量）
+ * @param {String} speciesKey - 当前物种查重键（保留参数以兼容调用方）
+ * @param {Array} existingKeys - 已收藏查重键列表（保留参数以兼容调用方）
  * @param {Number} streak - 当前连续天数
  * @param {Date|String} discoveredAt - 发现时间
  * @returns {Array} 标签对象数组
  */
 function calculateRarityTags(speciesKey, existingKeys, streak, discoveredAt) {
   const tags = [];
-
-  if (isFirstDiscovery(speciesKey, existingKeys)) {
-    tags.push({ ...RARITY_TAGS.FIRST_DISCOVERY, label: '首次发现' });
-  }
 
   if (streak >= 3) {
     tags.push({ ...RARITY_TAGS.STREAK, label: `连续 ${streak} 天` });
@@ -190,7 +174,6 @@ function evaluateBadges(stats) {
 }
 
 module.exports = {
-  isFirstDiscovery,
   isNightDiscovery,
   calculateStreak,
   calculateRarityTags,

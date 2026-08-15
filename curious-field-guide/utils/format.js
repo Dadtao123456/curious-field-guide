@@ -32,19 +32,19 @@ function formatDiscoveryTime(isoString) {
 function parseRarityTags(tags) {
   if (!Array.isArray(tags) || tags.length === 0) return [];
 
-  return tags.map(tag => {
-    const label = String(tag);
-    if (label.includes('首次')) {
-      return { label, color: 'green' };
-    }
-    if (label.includes('连续') || label.includes('streak')) {
-      return { label, color: 'orange' };
-    }
-    if (label.includes('夜间')) {
-      return { label, color: 'purple' };
-    }
-    return { label, color: 'blue' };
-  });
+  return tags
+    // 「首次发现」标签已下线：旧收藏数据中仍可能存有这个标签，直接过滤不展示
+    .filter(tag => !String(tag).includes('首次'))
+    .map(tag => {
+      const label = String(tag);
+      if (label.includes('连续') || label.includes('streak')) {
+        return { label, color: 'orange' };
+      }
+      if (label.includes('夜间')) {
+        return { label, color: 'purple' };
+      }
+      return { label, color: 'blue' };
+    });
 }
 
 module.exports = {

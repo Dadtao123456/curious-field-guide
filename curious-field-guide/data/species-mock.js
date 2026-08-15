@@ -164,7 +164,7 @@ const MOCK_DISCOVERIES = [
     userPhotoUrl: '',
     location: '奥森公园',
     discoveredAt: '2026-08-04T10:23:00+08:00',
-    rarityTags: ['首次发现', '连续 12 天']
+    rarityTags: ['连续 12 天']
   },
   {
     id: 'd2',
@@ -175,7 +175,7 @@ const MOCK_DISCOVERIES = [
     userPhotoUrl: '',
     location: '朝阳公园',
     discoveredAt: '2026-08-03T16:45:00+08:00',
-    rarityTags: ['首次发现']
+    rarityTags: []
   },
   {
     id: 'd3',

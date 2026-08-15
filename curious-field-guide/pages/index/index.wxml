@@ -40,7 +40,8 @@
         data-key="{{item.viewKey}}"
       >
         <view class="recent-thumb">
-          <text class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>
+          <image wx:if="{{item.userPhotoUrl}}" src="{{item.userPhotoUrl}}" mode="aspectFill" class="recent-thumb-img" />
+          <text wx:else class="recent-emoji">{{categoryEmojiMap[item.category]}}</text>
         </view>
         <view class="recent-info">
           <view class="recent-name-row">

@@ -168,6 +168,13 @@
   font-size: 48rpx;
 }
 
+/* 实拍缩略图：有实拍图时铺满手绘边框缩略框 */
+.recent-thumb-img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
 .recent-info {
   flex: 1;
   display: flex;

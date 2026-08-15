@@ -22,6 +22,9 @@ const API_PATH = {
 
 // 置信度低于该值视为识别失败（PRD：0.5 以下进失败页）
 const FAIL_CONFIDENCE = 0.5;
+// 兜底路径（通用识别结果）的最低置信度：通用识别打分天然偏低（什么都认、不如垂类专），
+// 实测猫狗等常见对象正确结果常在 0.4 左右；兜底结果前端必带「识别不确定」黄条，风险可控
+const FALLBACK_MIN_CONFIDENCE = 0.3;
 // 单次 HTTP 请求超时时间（毫秒），PRD 要求整体 10 秒内可取消
 const REQUEST_TIMEOUT = 8000;
 
@@ -254,11 +257,22 @@ async function enrichFromINat(chineseName) {
       return null;
     }
 
-    // 优先选种/亚种级别且名称精确匹配的；没有则取第一条
+    // 名称质量校验：只接受与查询名真正相关的结果（精确匹配/互为包含/命中词一致），
+    // 宁可返回 null 显示占位，也不能张冠李戴（实测「小狗」曾匹配到深海鱼）
+    const isNameRelated = (item) => {
+      const common = item.preferred_common_name || '';
+      return common === chineseName ||
+             common.includes(chineseName) ||
+             (common.length >= 2 && chineseName.includes(common)) ||
+             item.matched_term === chineseName;
+    };
     const target = results.find(item =>
-      ['species', 'subspecies'].includes(item.rank) &&
-      (item.preferred_common_name === chineseName || item.name === chineseName)
-    ) || results[0];
+      ['species', 'subspecies', 'genus', 'family'].includes(item.rank) && isNameRelated(item)
+    );
+    if (!target) {
+      console.log('[identify] iNat 无名称匹配的物种，跳过百科增强：', chineseName);
+      return null;
+    }
 
     // 第二步：取物种详情（简介/标准图/分类阶元都在详情里）
     const detail = await inatGet(`/v1/taxa/${target.id}?locale=zh-CN`);
@@ -351,7 +365,7 @@ function buildFailResult(reason, message) {
  */
 function buildGeneralFallback(classifiable, verticalResults, category, location) {
   const candidate = toCandidate(classifiable, category);
-  if (candidate.confidence < FAIL_CONFIDENCE) {
+  if (candidate.confidence < FALLBACK_MIN_CONFIDENCE) {
     return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
   }
   const alternatives = (verticalResults || [])

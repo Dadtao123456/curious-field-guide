@@ -298,6 +298,27 @@ Page({
     });
 
     wx.pageScrollTo({ scrollTop: 0, duration: 200 });
+
+    // 候选默认不带百科内容（主流程只增强首选），切换后按需补充
+    if (!candidate.description) {
+      api.enrichSpecies(candidate.name).then(enrichment => {
+        // 用户可能已切走，只更新仍停留在该候选的情况
+        if (!enrichment || this.data.currentCandidateIndex !== poolIndex) {
+          return;
+        }
+        const pool = this.data.candidatePool.slice();
+        pool[poolIndex] = { ...pool[poolIndex], ...enrichment };
+        this.setData({ candidatePool: pool });
+        this.fillSpecies({
+          name: pool[poolIndex].name,
+          latinName: enrichment.latinName || pool[poolIndex].latinName,
+          speciesKey: pool[poolIndex].speciesKey,
+          category: pool[poolIndex].category,
+          order: enrichment.order || pool[poolIndex].order,
+          family: enrichment.family || pool[poolIndex].family
+        }, enrichment.description, pool[poolIndex].habitat);
+      });
+    }
   },
 
   /**

@@ -310,11 +310,32 @@ function addCollection(record) {
   }
 }
 
+/**
+ * 按需补充物种百科内容
+ * 说明：识别结果的候选物种默认只有名字（主流程只增强首选），
+ *       结果页切换候选时调用此接口补充拉丁名/简介/目科
+ * @param {String} name - 物种中文名
+ * @returns {Promise<Object|null>} 百科内容或 null（查不到/失败时静默降级）
+ */
+function enrichSpecies(name) {
+  return wx.cloud.callFunction({
+    name: 'identify',
+    data: { action: 'enrich', name }
+  }).then(res => {
+    const result = (res && res.result) || {};
+    return result.success ? result.enrichment : null;
+  }).catch(error => {
+    console.error('[api] 百科增强失败', error);
+    return null;
+  });
+}
+
 module.exports = {
   getDashboard,
   identifyImage,
   searchSpecies,
   getDiscoveryById,
   getCollections,
-  addCollection
+  addCollection,
+  enrichSpecies
 };

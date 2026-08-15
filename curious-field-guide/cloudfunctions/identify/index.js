@@ -146,7 +146,7 @@ async function getAccessToken(forceRefresh) {
  */
 async function callBaiduApi(apiPath, imageBase64, retried, tag, withBaike) {
   const token = await getAccessToken(false);
-  const postData = `image=${encodeURIComponent(imageBase64)}${withBaike ? '&baike_num=1' : ''}`;
+  const postData = `image=${encodeURIComponent(imageBase64)}${withBaike ? '&baike_num=3' : ''}`;
   const data = await httpsRequestWithRetry({
     host: BAIDU_HOST,
     path: `${apiPath}?access_token=${token}`,
@@ -196,8 +196,9 @@ function isFungi(name) {
 
 /**
  * 把百度返回的一条结果转换为统一的候选物种格式
- * 说明：百度的 score 字段是字符串（如 "0.86"），统一转成数字，避免前端类型错误
- * @param {Object} item - 百度结果项（name/keyword + score）
+ * 说明：百度的 score 字段是字符串（如 "0.86"），统一转成数字，避免前端类型错误；
+ *       baike_num=3 时前 3 条结果自带百度百科简介（baike_info.description），一并带上
+ * @param {Object} item - 百度结果项（name/keyword + score + 可选 baike_info）
  * @param {String} category - 分类 key
  * @returns {Object} 候选物种
  */
@@ -210,7 +211,7 @@ function toCandidate(item, category) {
     category,
     order: '',
     family: '',
-    description: '',
+    description: (item.baike_info && item.baike_info.description) || '',
     habitat: '',
     confidence: Number(item.score) || 0
   };
@@ -251,24 +252,26 @@ function inatGet(path) {
 async function enrichFromINat(chineseName) {
   try {
     // 第一步：按中文名搜索物种（autocomplete 对中文俗名匹配最好）
-    const auto = await inatGet(`/v1/taxa/autocomplete?q=${encodeURIComponent(chineseName)}&locale=zh-CN&per_page=5`);
+    const auto = await inatGet(`/v1/taxa/autocomplete?q=${encodeURIComponent(chineseName)}&locale=zh-CN&per_page=10`);
     const results = auto.results || [];
     if (!results.length) {
       return null;
     }
 
-    // 名称质量校验：只接受与查询名真正相关的结果（精确匹配/互为包含/命中词一致），
-    // 宁可返回 null 显示占位，也不能张冠李戴（实测「小狗」曾匹配到深海鱼）
-    const isNameRelated = (item) => {
-      const common = item.preferred_common_name || '';
-      return common === chineseName ||
-             common.includes(chineseName) ||
-             (common.length >= 2 && chineseName.includes(common)) ||
-             item.matched_term === chineseName;
-    };
-    const target = results.find(item =>
-      ['species', 'subspecies', 'genus', 'family'].includes(item.rank) && isNameRelated(item)
-    );
+    // 名称质量校验：单字中文名（葱/蒜/猫）歧义大，必须分级匹配——
+    // ① 种/亚种的精确匹配；② 命中词一致；③ 科/属级且名称为「查询名+科/属/族」的整词形态
+    // （如 猫→猫科 可以接受；葱→葱芥属 是另一种植物，不能接受）
+    // 宁可返回 null 显示占位，也不能张冠李戴
+    const isSpeciesRank = item => ['species', 'subspecies'].includes(item.rank);
+    const groupSuffix = new RegExp(`^${chineseName}(科|属|族|亚科|亚属)$`);
+    const target =
+      results.find(item => isSpeciesRank(item) &&
+        (item.preferred_common_name === chineseName || item.name === chineseName)) ||
+      results.find(item => item.matched_term === chineseName &&
+        ['species', 'subspecies', 'genus'].includes(item.rank)) ||
+      results.find(item =>
+        ['genus', 'family', 'subfamily', 'tribe'].includes(item.rank) &&
+        groupSuffix.test(item.preferred_common_name || ''));
     if (!target) {
       console.log('[identify] iNat 无名称匹配的物种，跳过百科增强：', chineseName);
       return null;
@@ -386,7 +389,20 @@ function buildGeneralFallback(classifiable, verticalResults, category, location)
  * @param {Object} event - { fileID: 云存储照片 ID, location: 用户位置文本 }
  */
 exports.main = async (event) => {
-  const { fileID, location } = event || {};
+  const { fileID, location, action, name } = event || {};
+
+  // 子动作：单独查询物种百科内容
+  // 用途：结果页切换候选时按需补充（识别主流程只增强首选，避免为每个候选多发 2 次请求）
+  if (action === 'enrich') {
+    if (!name) {
+      return buildFailResult('invalid_param', '缺少物种名');
+    }
+    const enrichment = await enrichFromINat(name);
+    if (!enrichment) {
+      return buildFailResult('no_result', '暂无该物种的百科内容');
+    }
+    return { success: true, enrichment };
+  }
 
   if (!fileID) {
     return buildFailResult('invalid_param', '照片上传异常，请重试');

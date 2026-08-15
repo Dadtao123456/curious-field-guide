@@ -134,12 +134,13 @@ Page({
     }))];
 
     // 置信度可能为 null（手动搜索无置信度），此时不展示低置信度黄条
+    // isFallback：垂类接口不达标、用通用识别兜底的结果，同样提示「识别不确定」
     const confidence = result.confidence;
 
     this.setData({
       userPhotoUrl: result.userPhotoUrl || '',
       officialPhotoUrl: result.officialPhotoUrl || '',
-      isUncertain: confidence != null && confidence < LOW_CONFIDENCE_THRESHOLD,
+      isUncertain: (confidence != null && confidence < LOW_CONFIDENCE_THRESHOLD) || !!result.isFallback,
       isFungi: result.species.category === 'fungi',
       isManualSearch: !!result.isManualSearch,
       confidenceText: confidence != null ? confidence.toFixed(2) : '',

@@ -295,7 +295,7 @@ async function enrichFromINat(chineseName) {
  *   拉丁名/目科：iNaturalist 提供，百度百科不含结构化分类
  *   两个来源都失败时百科字段为空，前端显示占位
  */
-async function buildSuccessResult({ candidate, alternatives, source, location, baike }) {
+async function buildSuccessResult({ candidate, alternatives, source, location, baike, isFallback }) {
   const enrichment = await enrichFromINat(candidate.name);
 
   const baikeDescription = baike && baike.description ? baike.description : '';
@@ -326,7 +326,9 @@ async function buildSuccessResult({ candidate, alternatives, source, location, b
     alternatives,
     location: location || '',
     discoveredAt: new Date().toISOString(),
-    isMultiSubject: false
+    isMultiSubject: false,
+    // 兜底结果标记：垂类接口不达标、用通用识别名称兜底时为 true，前端展示「识别不确定」黄条
+    isFallback: !!isFallback
   };
 }
 
@@ -335,6 +337,34 @@ async function buildSuccessResult({ candidate, alternatives, source, location, b
  */
 function buildFailResult(reason, message) {
   return { success: false, reason, message };
+}
+
+/**
+ * 垂类接口不达标时的兜底：用通用识别的粗分类名称作为结果
+ * 说明：常见家养动物（猫/狗）在百度动物识别里只能拿到品种级低置信度，
+ *       按技术文档 3.1 用通用识别结果兜底（如「猫」），并标记 isFallback 提示不确定
+ * @param {Object} classifiable - 通用识别中第一条有明确大类的结果
+ * @param {Array} verticalResults - 垂类接口原始结果（过滤低分后作为候选）
+ * @param {String} category - 分类 key
+ * @param {String} location - 位置文本
+ * @returns {Promise<Object>} 识别结果（通用置信度也不达标时返回失败）
+ */
+function buildGeneralFallback(classifiable, verticalResults, category, location) {
+  const candidate = toCandidate(classifiable, category);
+  if (candidate.confidence < FAIL_CONFIDENCE) {
+    return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
+  }
+  const alternatives = (verticalResults || [])
+    .filter(item => (Number(item.score) || 0) >= 0.3)
+    .slice(0, 2)
+    .map(item => toCandidate(item, category));
+  return buildSuccessResult({
+    candidate,
+    alternatives,
+    source: 'baidu-general',
+    location,
+    isFallback: true
+  });
 }
 
 /**
@@ -390,14 +420,13 @@ exports.main = async (event) => {
       const plant = await callBaiduApi(API_PATH.PLANT, imageBase64, false, '植物识别', true);
       // 过滤「非植物」等兜底名称
       const results = (plant.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
-      if (!results.length) {
-        return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
+      // 垂类接口不达标：按技术文档 3.1 用通用识别结果兜底
+      if (!results.length || (Number(results[0].score) || 0) < FAIL_CONFIDENCE) {
+        console.log('[identify] 植物接口不达标，走通用兜底');
+        return buildGeneralFallback(classifiable, results, 'plant', location);
       }
       console.log('[identify] 植物识别结果：', results[0].name, '/', results[0].score);
       const candidate = toCandidate(results[0], 'plant');
-      if (candidate.confidence < FAIL_CONFIDENCE) {
-        return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
-      }
       return await buildSuccessResult({
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, 'plant')),
@@ -411,15 +440,14 @@ exports.main = async (event) => {
       const animal = await callBaiduApi(API_PATH.ANIMAL, imageBase64, false, '动物识别', true);
       // 过滤「非动物」等兜底名称
       const results = (animal.result || []).filter(item => !NEGATIVE_NAMES.includes(item.name));
-      if (!results.length) {
-        return buildFailResult('no_result', '暂时无法识别，可能是新物种，也可能是照片不够清晰');
+      // 垂类接口不达标：按技术文档 3.1 用通用识别结果兜底（猫狗等家养动物常见此场景）
+      if (!results.length || (Number(results[0].score) || 0) < FAIL_CONFIDENCE) {
+        console.log('[identify] 动物接口不达标，走通用兜底');
+        return buildGeneralFallback(classifiable, results, refineAnimalCategory(classifiable.keyword || ''), location);
       }
       console.log('[identify] 动物识别结果：', results[0].name, '/', results[0].score);
       const category = refineAnimalCategory(results[0].name);
       const candidate = toCandidate(results[0], category);
-      if (candidate.confidence < FAIL_CONFIDENCE) {
-        return buildFailResult('low_confidence', '看不太清它是谁，换一张更清晰的照片试试');
-      }
       return await buildSuccessResult({
         candidate,
         alternatives: results.slice(1, 3).map(item => toCandidate(item, refineAnimalCategory(item.name))),

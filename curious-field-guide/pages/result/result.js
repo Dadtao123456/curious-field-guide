@@ -155,6 +155,9 @@ Page({
       location: result.location,
       discoveredAt: result.discoveredAt
     });
+
+    // 手动搜索/兜底结果可能无百科内容，按需懒加载补充
+    this.lazyEnrichCandidate(0);
   },
 
   /**
@@ -300,25 +303,37 @@ Page({
     wx.pageScrollTo({ scrollTop: 0, duration: 200 });
 
     // 候选默认不带百科内容（主流程只增强首选），切换后按需补充
-    if (!candidate.description) {
-      api.enrichSpecies(candidate.name).then(enrichment => {
-        // 用户可能已切走，只更新仍停留在该候选的情况
-        if (!enrichment || this.data.currentCandidateIndex !== poolIndex) {
-          return;
-        }
-        const pool = this.data.candidatePool.slice();
-        pool[poolIndex] = { ...pool[poolIndex], ...enrichment };
-        this.setData({ candidatePool: pool });
-        this.fillSpecies({
-          name: pool[poolIndex].name,
-          latinName: enrichment.latinName || pool[poolIndex].latinName,
-          speciesKey: pool[poolIndex].speciesKey,
-          category: pool[poolIndex].category,
-          order: enrichment.order || pool[poolIndex].order,
-          family: enrichment.family || pool[poolIndex].family
-        }, enrichment.description, pool[poolIndex].habitat);
-      });
+    this.lazyEnrichCandidate(poolIndex);
+  },
+
+  /**
+   * 按需补充候选物种的百科内容
+   * 说明：候选/手动搜索结果默认只有名字；补充成功后若用户仍停留在该候选，同步刷新展示
+   * @param {Number} poolIndex - 候选池下标
+   */
+  lazyEnrichCandidate(poolIndex) {
+    const candidate = this.data.candidatePool[poolIndex];
+    if (!candidate || candidate.description) {
+      return;
     }
+
+    api.enrichSpecies(candidate.name).then(enrichment => {
+      // 用户可能已切走，只更新仍停留在该候选的情况
+      if (!enrichment || this.data.currentCandidateIndex !== poolIndex) {
+        return;
+      }
+      const pool = this.data.candidatePool.slice();
+      pool[poolIndex] = { ...pool[poolIndex], ...enrichment };
+      this.setData({ candidatePool: pool });
+      this.fillSpecies({
+        name: pool[poolIndex].name,
+        latinName: enrichment.latinName || pool[poolIndex].latinName,
+        speciesKey: pool[poolIndex].speciesKey,
+        category: pool[poolIndex].category,
+        order: enrichment.order || pool[poolIndex].order,
+        family: enrichment.family || pool[poolIndex].family
+      }, enrichment.description, pool[poolIndex].habitat);
+    });
   },
 
   /**

@@ -147,11 +147,33 @@ function mockIdentify(imagePath, options) {
 
 /**
  * 手动搜索物种
- * 说明：v1.0 为 mock，根据关键词过滤 mock 物种列表
- * @param {String} keyword - 搜索关键词
+ * 说明：走云端 identify 云函数的 search 子动作（iNaturalist 物种库，几十万物种）；
+ *       云端不可用时降级为本地 mock 列表搜索，保证功能可用
+ * @param {String} keyword - 搜索关键词（物种名/俗名，不支持描述性短语）
  * @returns {Promise<Array>} 候选物种列表
  */
 function searchSpecies(keyword) {
+  return wx.cloud.callFunction({
+    name: 'identify',
+    data: { action: 'search', name: keyword }
+  }).then(res => {
+    const result = (res && res.result) || {};
+    if (!result.success) {
+      throw new Error(result.message || '搜索失败');
+    }
+    return result.results || [];
+  }).catch(error => {
+    console.error('[api] 云端搜索失败，降级为本地 mock 搜索', error);
+    return mockSearchSpecies(keyword);
+  });
+}
+
+/**
+ * 本地 mock 搜索（云端不可用时的降级方案）
+ * @param {String} keyword - 搜索关键词
+ * @returns {Array} 候选物种列表
+ */
+function mockSearchSpecies(keyword) {
   const lowerKeyword = keyword.toLowerCase();
 
   const results = MOCK_SPECIES_LIST.filter(item => {
@@ -161,7 +183,7 @@ function searchSpecies(keyword) {
            item.description.includes(keyword);
   });
 
-  return Promise.resolve(results.map(item => ({
+  return results.map(item => ({
     name: item.name,
     latinName: item.latinName,
     speciesKey: item.speciesKey,
@@ -170,7 +192,7 @@ function searchSpecies(keyword) {
     family: item.family,
     description: item.description,
     habitat: item.habitat
-  })));
+  }));
 }
 
 /**

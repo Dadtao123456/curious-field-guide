@@ -350,6 +350,90 @@ async function buildSuccessResult({ candidate, alternatives, source, location, b
 }
 
 /**
+ * 把 iNaturalist 的 iconic_taxon 映射到五类生物
+ * @param {String} iconicTaxon - iNat 的标志性分类名（如 Plantae / Aves / Insecta）
+ * @returns {String} 分类 key
+ */
+function mapInatTaxonToCategory(iconicTaxon) {
+  const map = {
+    Plantae: 'plant',
+    Aves: 'bird',
+    Insecta: 'insect',
+    Fungi: 'fungi'
+  };
+  return map[iconicTaxon] || 'animal';
+}
+
+/**
+ * 按关键词搜索物种（手动搜索页数据源）
+ * 说明：iNaturalist 的 autocomplete 对俗名友好、taxa 检索对学名贵广，两个接口结果合并去重后
+ *       按相关性重排（精确匹配 > 前缀 > 包含，同相关性下种优先于属）；
+ *       单字关键词（如"葱"）受数据源收录限制可能不够准，属已知妥协；
+ *       不支持描述性短语（如"绿色的叶子"）
+ * @param {String} keyword - 搜索关键词
+ * @returns {Promise<Object>} { success, results } 候选物种数组
+ */
+async function searchSpeciesByINat(keyword) {
+  try {
+    const query = encodeURIComponent(keyword);
+    const [auto, taxa] = await Promise.all([
+      inatGet(`/v1/taxa/autocomplete?q=${query}&locale=zh-CN&per_page=10`),
+      inatGet(`/v1/taxa?q=${query}&locale=zh-CN&per_page=10&rank=species,genus`)
+    ]);
+
+    // 合并去重（按 taxon id）
+    const seen = new Set();
+    const merged = [];
+    [...(auto.results || []), ...(taxa.results || [])].forEach(item => {
+      if (!seen.has(item.id)) {
+        seen.add(item.id);
+        merged.push(item);
+      }
+    });
+
+    // 相关性打分：分数越小越靠前；与关键词无关的结果返回 null（直接过滤，不展示）
+    // 注意：iNat 是字符级模糊匹配，描述性短语（如"绿色的条形叶子"）会匹配出"绿头鸭"这种
+    //       只沾一个字的噪音结果，必须过滤，宁可返回空
+    const relevance = (item) => {
+      const common = item.preferred_common_name || '';
+      const latin = item.name || '';
+      let score = null;
+      if (common === keyword || latin === keyword) score = 0;
+      else if (common.startsWith(keyword)) score = 1;
+      else if (common.includes(keyword)) score = 2;
+      else if (latin.toLowerCase().includes(keyword.toLowerCase())) score = 3;
+      if (score === null) return null;
+      // 同相关性下种/亚种优先于属
+      if (!['species', 'subspecies'].includes(item.rank)) score += 0.5;
+      return score;
+    };
+
+    const results = merged
+      .filter(item => ['species', 'subspecies', 'genus'].includes(item.rank))
+      .map(item => ({ item, score: relevance(item) }))
+      .filter(entry => entry.score !== null)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 10)
+      .map(entry => entry.item)
+      .map(item => ({
+        name: item.preferred_common_name || item.name,
+        latinName: item.name,
+        speciesKey: item.name,
+        category: mapInatTaxonToCategory(item.iconic_taxon_name),
+        order: '',
+        family: '',
+        description: '',
+        habitat: ''
+      }));
+
+    return { success: true, results };
+  } catch (error) {
+    console.error('[identify] 物种搜索失败', error);
+    return buildFailResult('service_error', '搜索服务暂时开小差了，请稍后再试');
+  }
+}
+
+/**
  * 组装识别失败的返回结构（reason 供前端区分失败原因）
  */
 function buildFailResult(reason, message) {
@@ -402,6 +486,14 @@ exports.main = async (event) => {
       return buildFailResult('no_result', '暂无该物种的百科内容');
     }
     return { success: true, enrichment };
+  }
+
+  // 子动作：按关键词搜索物种（手动搜索页）
+  if (action === 'search') {
+    if (!name) {
+      return buildFailResult('invalid_param', '缺少搜索关键词');
+    }
+    return searchSpeciesByINat(name);
   }
 
   if (!fileID) {

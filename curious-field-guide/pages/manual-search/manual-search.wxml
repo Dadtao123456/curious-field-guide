@@ -20,14 +20,14 @@
 
   <!-- 初始态 -->
   <view class="search-hint-block" wx:if="{{!searched}}">
-    <text class="search-hint-icon">🔎</text>
-    <text class="text-hint">试试：白色 大翅膀 / 玉带凤蝶 / 公园常见的鸟</text>
+    <image class="search-hint-img" src="/images/icons/icon-search.png" mode="aspectFit" />
+    <text class="text-hint">试试：大嘴乌鸦 / 月季 / 凤蝶</text>
   </view>
 
   <!-- 无结果态 -->
   <view class="search-hint-block" wx:if="{{searched && results.length === 0}}">
-    <text class="search-hint-icon">🍂</text>
-    <text class="text-hint">未找到相关物种，建议尝试更通用的关键词，如颜色 + 形状</text>
+    <image class="search-hint-img" src="/images/icons/icon-empty.png" mode="aspectFit" />
+    <text class="text-hint">未找到相关物种，试试完整的物种名，如「大嘴乌鸦」</text>
   </view>
 
   <!-- 候选列表 -->

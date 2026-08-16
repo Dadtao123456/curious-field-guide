@@ -11,7 +11,7 @@
   <view class="camera-entry-wrapper mt-lg">
     <view class="camera-entry {{isBrowseOnly ? 'camera-entry-disabled' : ''}}" bindtap="onCameraEntryTap" bindlongpress="onCameraEntryLongPress">
       <view class="camera-icon-wrap">
-        <text class="camera-icon">📷</text>
+        <image class="camera-icon-img" src="/images/icons/icon-camera.png" mode="aspectFit" />
       </view>
       <text class="camera-title">拍一张，认识它</text>
       <text class="camera-desc">支持昆虫、植物、鸟类、菌类、动物</text>
@@ -57,7 +57,7 @@
 
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{dashboard.recentDiscoveries.length === 0}}">
-    <text class="empty-icon">🌱</text>
+    <image class="empty-icon-img" src="/images/icons/icon-empty.png" mode="aspectFit" />
     <text class="text-hint">还没有发现，快去拍第一张吧</text>
   </view>
 </view>

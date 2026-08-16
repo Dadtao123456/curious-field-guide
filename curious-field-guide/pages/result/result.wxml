@@ -4,7 +4,7 @@
 <!-- 识别失败态 -->
 <view class="page-container result-page result-failed" wx:if="{{isFailed}}">
   <view class="failed-block">
-    <text class="failed-icon">🔍</text>
+    <image class="failed-icon-img" src="/images/icons/icon-search.png" mode="aspectFit" />
     <text class="failed-title">暂时无法识别</text>
     <text class="failed-desc">{{failMessage}}</text>
     <view class="failed-actions">
@@ -39,7 +39,7 @@
   <view class="photo-single {{isUncertain || isFungi ? 'mt-md' : ''}}">
     <image wx:if="{{userPhotoUrl}}" src="{{userPhotoUrl}}" mode="aspectFill" class="photo-img photo-single-img" bindtap="onPhotoTap" data-type="user" />
     <view wx:else class="photo-placeholder photo-placeholder-life photo-single-img">
-      <text class="photo-emoji">📷</text>
+      <image class="photo-placeholder-icon" src="/images/icons/icon-camera.png" mode="aspectFit" />
     </view>
   </view>
 

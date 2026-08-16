@@ -31,6 +31,12 @@
   font-size: 72rpx;
 }
 
+/* 照片占位中的相机手绘图标 */
+.photo-placeholder-icon {
+  width: 30%;
+  height: 30%;
+}
+
 /* 物种名称区 */
 .species-block {
   display: flex;
@@ -210,6 +216,13 @@
 
 .failed-icon {
   font-size: 96rpx;
+  transform: rotate(-3deg);
+}
+
+/* 识别失败态放大镜手绘图标 */
+.failed-icon-img {
+  width: 150rpx;
+  height: 150rpx;
   transform: rotate(-3deg);
 }
 

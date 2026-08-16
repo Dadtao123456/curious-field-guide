@@ -63,7 +63,7 @@
 
   <!-- 空态 -->
   <view class="empty-state" wx:if="{{totalCount === 0}}">
-    <text class="empty-icon">📚</text>
+    <image class="empty-icon-img" src="/images/icons/icon-empty.png" mode="aspectFit" />
     <text class="text-hint">图鉴还是空的，去拍第一张吧</text>
   </view>
 </view>

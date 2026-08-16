@@ -55,7 +55,7 @@
   height: 132rpx;
   border: var(--border-width-lg) solid var(--border-color);
   border-radius: 50%;
-  background: var(--pencil);
+  background: var(--cream);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,9 +63,10 @@
   margin-bottom: var(--space-md);
 }
 
-.camera-icon {
-  font-size: 64rpx;
-  color: var(--paper);
+/* 相机手绘图标 */
+.camera-icon-img {
+  width: 74%;
+  height: 74%;
 }
 
 .camera-title {
@@ -214,6 +215,14 @@
 
 .empty-icon {
   font-size: 80rpx;
+  margin-bottom: var(--space-sm);
+  transform: rotate(-3deg);
+}
+
+/* 空状态手绘图标 */
+.empty-icon-img {
+  width: 140rpx;
+  height: 140rpx;
   margin-bottom: var(--space-sm);
   transform: rotate(-3deg);
 }

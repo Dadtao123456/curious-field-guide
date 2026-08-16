@@ -49,6 +49,13 @@
   transform: rotate(-3deg);
 }
 
+/* 搜索提示区手绘图标 */
+.search-hint-img {
+  width: 120rpx;
+  height: 120rpx;
+  transform: rotate(-3deg);
+}
+
 /* 候选列表 */
 .candidate-list {
   display: flex;

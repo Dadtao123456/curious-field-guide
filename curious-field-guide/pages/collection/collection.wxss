@@ -190,3 +190,11 @@
   margin-bottom: var(--space-sm);
   transform: rotate(-3deg);
 }
+
+/* 空状态手绘图标 */
+.empty-icon-img {
+  width: 140rpx;
+  height: 140rpx;
+  margin-bottom: var(--space-sm);
+  transform: rotate(-3deg);
+}

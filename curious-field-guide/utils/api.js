@@ -44,7 +44,9 @@ function identifyImage(imagePath, options = {}) {
  * @returns {Promise<Object>} 识别结果
  */
 function identifyByCloud(imagePath, options) {
+  let uploadedFileID = '';
   return uploadIdentifyPhoto(imagePath).then(fileID => {
+    uploadedFileID = fileID;
     return wx.cloud.callFunction({
       name: 'identify',
       data: { fileID, location: options.location || '' }
@@ -54,6 +56,8 @@ function identifyByCloud(imagePath, options) {
     if (typeof result.success === 'undefined') {
       return { success: false, reason: 'empty_result', message: '识别服务暂时开小差了，请稍后再试' };
     }
+    // 保留照片的云存储 ID：收藏时入库（本地临时路径会失效，不能作为收藏图）
+    result.photoFileID = uploadedFileID;
     return result;
   }).catch(error => {
     console.error('[api] 识别请求失败', error);
@@ -197,11 +201,39 @@ function mockSearchSpecies(keyword) {
 
 /**
  * 按 key 获取单条发现/收藏记录（只读模式）
- * 说明：key 兼容发现记录 id 与物种 speciesKey；合并物种百科字段，供结果页/详情页展示
+ * 说明：优先查云端收藏；查不到/云端不可用时降级查本地缓存与 mock 历史发现
  * @param {String} key - 发现记录 id 或物种 speciesKey
  * @returns {Promise<Object>} 发现记录 + 物种信息
  */
 function getDiscoveryById(key) {
+  return callCollections('get', { speciesKey: key }).then(result => {
+    const item = result.record;
+    return {
+      id: item.speciesKey,
+      speciesName: item.speciesName,
+      latinName: item.latinName || '',
+      speciesKey: item.speciesKey,
+      category: item.category,
+      userPhotoUrl: item.userPhotoUrl || '',
+      location: item.location || '未知地点',
+      discoveredAt: item.collectedAt,
+      rarityTags: item.rarityTags || [],
+      description: item.description || '',
+      habitat: item.habitat || '',
+      order: item.order || '',
+      family: item.family || '',
+      officialPhotoUrl: item.officialPhotoUrl || ''
+    };
+  }).catch(error => {
+    console.error('[api] 云端查询失败，降级本地查询', error);
+    return getDiscoveryByIdLocal(key);
+  });
+}
+
+/**
+ * 本地查询单条记录（云端不可用时的降级方案）
+ */
+function getDiscoveryByIdLocal(key) {
   let record = MOCK_DISCOVERIES.find(item => item.id === key);
 
   if (!record) {
@@ -252,12 +284,64 @@ function getDiscoveryById(key) {
 }
 
 /**
- * 获取已收藏列表（mock）
- * 说明：v1.0 合并「历史发现 mock」与「本地收藏缓存」，按 speciesKey 去重；
- *       接入云开发后改为查询数据库
+ * 调用 collections 云函数的统一入口
+ * @param {String} action - list / add / get / migrate
+ * @param {Object} data - 附加参数
+ * @returns {Promise<Object>} 云函数返回的 result
+ */
+function callCollections(action, data = {}) {
+  return wx.cloud.callFunction({
+    name: 'collections',
+    data: { action, ...data }
+  }).then(res => {
+    const result = (res && res.result) || {};
+    if (!result.success) {
+      throw new Error(result.message || '收藏服务异常');
+    }
+    return result;
+  });
+}
+
+/**
+ * 云端收藏记录 → 页面统一格式
+ */
+function mapCloudRecord(item) {
+  return {
+    viewKey: item.speciesKey,
+    speciesName: item.speciesName,
+    latinName: item.latinName || '',
+    speciesKey: item.speciesKey,
+    category: item.category,
+    userPhotoUrl: item.userPhotoUrl || '',
+    location: item.location || '未知地点',
+    discoveredAt: item.collectedAt,
+    rarityTags: item.rarityTags || [],
+    description: item.description || '',
+    habitat: item.habitat || '',
+    order: item.order || '',
+    family: item.family || '',
+    officialPhotoUrl: item.officialPhotoUrl || ''
+  };
+}
+
+/**
+ * 获取已收藏列表
+ * 说明：优先读云端（按 openid 隔离，换机不丢）；云端不可用时降级本地缓存 + mock 历史发现
  * @returns {Promise<Array>} 收藏记录数组，每项含 viewKey 供详情跳转
  */
 function getCollections() {
+  return callCollections('list')
+    .then(result => (result.list || []).map(mapCloudRecord))
+    .catch(error => {
+      console.error('[api] 云端收藏读取失败，降级本地数据', error);
+      return getCollectionsLocal();
+    });
+}
+
+/**
+ * 本地收藏列表（云端不可用时的降级方案）：合并本地缓存与 mock 历史发现
+ */
+function getCollectionsLocal() {
   let stored = [];
   try {
     stored = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
@@ -302,16 +386,35 @@ function getCollections() {
     return true;
   });
 
-  return Promise.resolve(list);
+  return list;
 }
 
 /**
- * 收入图鉴（mock）
- * 说明：把识别结果追加到本地收藏列表；已收藏过或历史发现中已存在（本就在图鉴中）的物种不重复写入
- * @param {Object} record - 收藏记录（含 speciesKey）
+ * 收入图鉴
+ * 说明：优先写云端；photoFileID（识别时已传云存储）作为收藏的实拍图，本地临时路径会失效不入库；
+ *       云端不可用时降级写本地缓存
+ * @param {Object} record - 收藏记录（含 speciesKey、photoFileID）
  * @returns {Promise<Object>} { success, duplicated }
  */
 function addCollection(record) {
+  const payload = {
+    ...record,
+    userPhotoUrl: record.photoFileID || ''
+  };
+  delete payload.photoFileID;
+
+  return callCollections('add', { record: payload })
+    .then(result => ({ success: true, duplicated: result.duplicated }))
+    .catch(error => {
+      console.error('[api] 云端收藏失败，降级写本地', error);
+      return addCollectionLocal(record);
+    });
+}
+
+/**
+ * 本地收藏（云端不可用时的降级方案）
+ */
+function addCollectionLocal(record) {
   try {
     const list = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
     const inStored = list.some(item => item.speciesKey === record.speciesKey);
@@ -325,11 +428,44 @@ function addCollection(record) {
       });
       wx.setStorageSync(STORAGE_KEYS.COLLECTIONS, list);
     }
-    return Promise.resolve({ success: true, duplicated });
+    return { success: true, duplicated };
   } catch (error) {
     console.error('[api] 收藏失败', error);
-    return Promise.resolve({ success: false, duplicated: false });
+    return { success: false, duplicated: false };
   }
+}
+
+/**
+ * 本地收藏迁移上云（静默执行一次）
+ * 说明：上云前收藏的物种存在本地，首次启动时逐条迁移；迁移完成打标记，不再重复执行
+ * @returns {Promise}
+ */
+function migrateLocalCollections() {
+  let local = [];
+  try {
+    if (wx.getStorageSync(STORAGE_KEYS.COLLECTIONS_MIGRATED)) {
+      return Promise.resolve();
+    }
+    local = wx.getStorageSync(STORAGE_KEYS.COLLECTIONS) || [];
+  } catch (error) {
+    return Promise.resolve();
+  }
+
+  if (!local.length) {
+    try {
+      wx.setStorageSync(STORAGE_KEYS.COLLECTIONS_MIGRATED, 1);
+    } catch (error) { /* 忽略 */ }
+    return Promise.resolve();
+  }
+
+  return callCollections('migrate', { records: local }).then(result => {
+    console.log('[api] 本地收藏迁移完成，新增', result.added, '条');
+    try {
+      wx.setStorageSync(STORAGE_KEYS.COLLECTIONS_MIGRATED, 1);
+    } catch (error) { /* 忽略 */ }
+  }).catch(error => {
+    console.error('[api] 收藏迁移失败，下次启动重试', error);
+  });
 }
 
 /**
@@ -359,5 +495,6 @@ module.exports = {
   getDiscoveryById,
   getCollections,
   addCollection,
-  enrichSpecies
+  enrichSpecies,
+  migrateLocalCollections
 };

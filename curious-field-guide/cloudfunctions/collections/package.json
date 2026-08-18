@@ -1,0 +1,9 @@
+{
+  "name": "collections",
+  "version": "1.0.0",
+  "description": "好奇图鉴-用户收藏云函数（云数据库按 openid 隔离）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

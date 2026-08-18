@@ -51,7 +51,9 @@ const STORAGE_KEYS = {
   COLLECTIONS: 'mock_collections',
   SHARE_CARD: 'share_card_data',
   // 用户资料（头像临时路径 + 昵称），收藏上云后迁移到数据库
-  USER_PROFILE: 'user_profile'
+  USER_PROFILE: 'user_profile',
+  // 本地收藏是否已迁移上云的标记
+  COLLECTIONS_MIGRATED: 'collections_migrated'
 };
 
 /**

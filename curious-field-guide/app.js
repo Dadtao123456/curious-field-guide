@@ -2,6 +2,7 @@
 // 负责：全局状态管理、隐私授权状态、静默登录占位、首次启动引导
 
 const auth = require('./utils/auth');
+const api = require('./utils/api');
 const { STORAGE_KEYS, CLOUD_ENV_ID } = require('./utils/constants');
 
 App({
@@ -26,6 +27,8 @@ App({
   onLaunch() {
     this.initCloud();
     this.loadPrivacyStatusFromStorage();
+    // 本地收藏静默迁移上云（仅执行一次，云端不可用时下次启动自动重试）
+    api.migrateLocalCollections();
   },
 
   /**

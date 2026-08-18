@@ -46,6 +46,8 @@ Page({
     showPrivacyModal: false,
     // 用户拍摄的照片临时路径
     userPhotoUrl: '',
+    // 照片的云存储 ID（识别时上传；收藏时入库，本地临时路径会失效不能入库）
+    photoFileID: '',
     // 分类 emoji（官方图占位）
     categoryEmoji: '',
     // 物种信息
@@ -140,6 +142,7 @@ Page({
     this.setData({
       userPhotoUrl: result.userPhotoUrl || '',
       officialPhotoUrl: result.officialPhotoUrl || '',
+      photoFileID: result.photoFileID || '',
       isUncertain: (confidence != null && confidence < LOW_CONFIDENCE_THRESHOLD) || !!result.isFallback,
       isFungi: result.species.category === 'fungi',
       isManualSearch: !!result.isManualSearch,
@@ -427,6 +430,7 @@ Page({
       officialPhotoUrl: this.data.officialPhotoUrl,
       location: this.data.discovery.location,
       userPhotoUrl: this.data.userPhotoUrl,
+      photoFileID: this.data.photoFileID,
       rarityTags: this.data.tags.map(tag => tag.label)
     }).then(res => {
       if (res.success) {

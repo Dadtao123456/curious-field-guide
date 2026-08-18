@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-08-18 10:40
+
+- **描述**：接入真实定位。拍照识别前静默获取微信定位（gcj02），经新增的 getLocationName 云函数调腾讯位置服务逆地址解析为可读地名（如"奥林匹克森林公园南园内"），作为发现地点存入收藏。用户拒绝授权、定位失败、解析失败、超时（5 秒）都静默降级为"未知地点"，不阻塞识别。腾讯地图 Key 走 config.local.js 本地配置（不进仓库），申请填入后即可用。
+- **模块**：
+  - `curious-field-guide/cloudfunctions/getLocationName/`（新增云函数）
+  - `curious-field-guide/utils/location.js`（新增定位工具）
+  - `curious-field-guide/pages/index/index.js`（识别流程带定位）
+- **备注**：
+  - 待用户操作：在 lbs.qq.com 申请 WebServiceAPI Key（勾选逆地址解析），填入 `cloudfunctions/getLocationName/config.local.js`，然后部署 getLocationName 云函数。
+  - app.json 的 location 权限声明之前已配好；已用模拟报文验证解析逻辑 3 项通过。
+
+---
+
 ## 2026-08-18 10:00
 
 - **描述**：收藏数据上云（上线前最关键一步）。新增 collections 云函数：收藏记录存云数据库，按微信 openid 自动隔离（静默登录，用户无感知、无授权弹窗），换手机/重装数据不丢。识别照片在识别时已传云存储，收藏直接存图片云 ID（本地临时路径会失效，不入库）。测试期的本地收藏会在首次启动时自动迁移上云（只执行一次）。云端不可用时自动降级读本地缓存，功能不死。图鉴页/首页/我的页数据口径不变，改动对页面透明。

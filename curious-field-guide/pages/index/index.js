@@ -3,6 +3,7 @@
 
 const api = require('../../utils/api');
 const auth = require('../../utils/auth');
+const location = require('../../utils/location');
 const { CATEGORIES, CATEGORY_ICON_MAP, STORAGE_KEYS } = require('../../utils/constants');
 const { formatDiscoveryTime, parseRarityTags } = require('../../utils/format');
 
@@ -186,8 +187,9 @@ Page({
   },
 
   /**
-   * 调用 mock 识别并跳转结果页
+   * 静默获取位置并调识别，跳转结果页
    * 说明：识别结果通过本地缓存传递给结果页（数据量大，不适合 URL 参数）；
+   *       定位失败不阻塞识别，地点显示「未知地点」；
    *       识别失败同样跳转，由结果页展示失败态与重拍/手动搜索入口
    * @param {String} imagePath - 照片临时路径
    * @param {Object} options - 透传给识别接口的参数（mock 阶段可带 scenario 测试场景）
@@ -195,7 +197,9 @@ Page({
   identifyAndNavigate(imagePath, options = {}) {
     wx.showLoading({ title: '识别中...', mask: true });
 
-    api.identifyImage(imagePath, options).then(result => {
+    location.getLocationText().then(locationText => {
+      return api.identifyImage(imagePath, { ...options, location: locationText });
+    }).then(result => {
       wx.hideLoading();
       result.userPhotoUrl = imagePath;
       wx.setStorageSync(STORAGE_KEYS.IDENTIFY_RESULT, result);

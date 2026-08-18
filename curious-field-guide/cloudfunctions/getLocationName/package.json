@@ -1,0 +1,9 @@
+{
+  "name": "getLocationName",
+  "version": "1.0.0",
+  "description": "好奇图鉴-逆地址解析云函数（腾讯位置服务）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
